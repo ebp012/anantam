@@ -1,0 +1,4 @@
+td {border: 1px solid black; padding: 27px;}
+tr.merged td:not(:nth-child(1)) {border: none;}
+.viewport-input {background-color: silver;}
+table * tr:not(:nth-child(2)) td {text-align: center;}
