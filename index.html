@@ -45,7 +45,41 @@
           <td class='viewport-input'>
             <center>
               <strong>Function</strong><br/>
-              f(x) = <input id='function-input' type='text' style='font-family: times;' value='(0.037) * x ** 2 + x - 10'/>
+              <p id='func1'>
+                f(x) = <input id='function-input' type='text' style='font-family: times;' value='math.add(math.multiply(0.037, math.pow(num, 2)), math.subtract(num, 10))'/>
+                <select id='function-colour'>
+                  <option>pink</option>
+                  <option value='red'>medium red</option>
+                  <option value='#880808'>dark red</option>
+                  <option value='#FFD580'>light orange</option>
+                  <option value='orange'>medium orange</option>
+                  <option>brown</option>
+                  <option value='#FFFDD0'>cream</option>
+                  <option>yellow</option>
+                  <option>gold</option>
+                  <option value='#90EE90'>light green</option>
+                  <option value='green'>medium green</option>
+                  <option value='#228B22'>dark green</option>
+                  <option value='#90E4C1'>light teal</option>
+                  <option value='teal'>medium teal</option>
+                  <option value='#008080'>dark teal</option>
+                  <option value='powderblue'>light blue</option>
+                  <option value='blue'>medium blue</option>
+                  <option value='navy'>navy blue</option>
+                  <option>indigo</option>
+                  <option selected='selected'>purple</option>
+                  <option>maroon</option>
+                  <option>magenta</option>
+                  <option>brown</option>
+                  <option>white</option>
+                  <option>silver</option>
+                  <option>grey</option>
+                  <option value='darkslategrey'>slate</option>
+                  <option>black</option>
+                  <option value='rgba(0,0,0,0)'>invisible</option>
+                </select>
+              </p>
+
             </center>
           </td>
           <td>
@@ -68,8 +102,8 @@
               <button id='graph-btn' onclick='graphFunction();'>Graph</button><br/><hr/>
               <form>
                 X-axis<br/>
-                <input type='radio' name='graph-dimension-x' id='graph-dimension-xr' checked='checked'/><label for='graph-dimension-r'>Real only</label><br/>
-                <input type='radio' name='graph-dimension-x' id='graph-dimension-xi'/><label for='graph-dimension-i'>Imaginary only</label><br/>
+                <input type='radio' name='graph-dimension-x' id='graph-dimension-xr' checked='checked'/><label for='graph-dimension-xr'>Real only</label><br/>
+                <input type='radio' name='graph-dimension-x' id='graph-dimension-xi'/><label for='graph-dimension-xi'>Imaginary only</label><br/>
               </form><br/>
               <form>
                 Y-axis<br/>
@@ -91,6 +125,7 @@
     
 
     <script>
+      // Axes and Trace Variables
       var xr = 0, xrp = 0; // x real (x axis)
       var xi = 0, xip = 0; // x imaginary (z axis)
       var yr = 0, yrp = 0; // y real (y axis)
@@ -214,6 +249,10 @@
           graphFunction();
         });
 
+        $('#function-input').addEventListener('input', function () {
+          func = eval($('#function-input').value);
+        });
+
         function resetOffset () {
           ctx.translate(-toffxr, -toffyr);
         }
@@ -264,8 +303,8 @@
         for (var i = 0; i < inputs.length; i++) {
           inputSetup(inputs[i]);
         }
-
-        drawGrid(6, 1);
+        graphFunction();
+        //drawGrid(6, 1);
       });
 
       function drawGrid (majorStep, minorStep) {
@@ -426,14 +465,16 @@
       // Solve the function for some X
       function solve2D (x) {
         // solve y = x^2/9 + x - 1
-        let func = (0.037) * x ** 2 + x - 10; //eval($('#function-input').value);
-        return round(func, Number($('#trace-round').value));
+        let func2D = (0.037) * x ** 2 + x - 10; //eval($('#function-input').value);
+        return round(func2D, Number($('#trace-round').value));
       }
       function solve (x, i, solveComplex) {
         // solve y = x^2/9 + x - 1
         let num = math.complex(x, i);
         //let func = (0.037) * num.re ** 2 + x - 10; //eval($('#function-input').value);
-        let func = math.add(math.multiply(0.037, math.pow(num, 2)), math.subtract(num, 10));
+        //let func = math.add(math.multiply(0.037, math.pow(num, 2)), math.subtract(num, 10));
+        let func = eval($('#function-input').value);
+        //let func = getFunction($('#function-input').value.toString());
         //let func = math.divide(1, num);
         if (solveComplex == false || solveComplex == undefined) {
           return round(func.re, Number($('#trace-round').value));
@@ -451,7 +492,7 @@
         ctx.translate(canvas.width/2 + 5 * toffxr, canvas.height/2 + 5 * toffyr);
         drawGrid(Number($('#graph-major-step').value), Number($('#graph-minor-step').value));
         if (do3D == true) drawGrid3D();
-        ctx.strokeStyle = 'purple';
+        ctx.strokeStyle = $('#function-colour').value;
         ctx.lineWidth = 1;
         //ctx.translate(180, 180);
         for (var i = -180; i < 180; i += 5/10) {
