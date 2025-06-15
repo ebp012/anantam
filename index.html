@@ -129,7 +129,7 @@
                     <input id='graph-grids' type='checkbox' checked='checked'/> <label for='graph-grids'>Grid lines?</label><br/>
                     <input id='graph-points' type='checkbox' checked='checked'/> <label for='graph-points'>Graph points?</label><br/>
                     <input id='graph-dimension-3d' type='checkbox'/> <label for='graph-dimension-3d'>Enable 3D?</label><br/>
-                    <input id='graph-auto' type='checkbox'/> <label for='graph-auto' title='resource-consuming'>Graph automatically?</label><br/>
+                    <input id='graph-auto' type='checkbox' checked='checked'/> <label for='graph-auto' title='resource-consuming'>Graph automatically?</label><br/>
                   </center>
                 </td>
               </tr>
@@ -203,7 +203,7 @@
       var toffyi = 0; // total yi-offset
 
       window.addEventListener('load', function() {
-        document.querySelector('#homeTab').click(); pascal.addDimension();
+        document.querySelector('#homeTab').click();
         setInterval(function() {
           // Update whether graph is 2D or 3D
           if ($('#graph-dimension-3d').checked == true) {
@@ -264,6 +264,11 @@
             graphFunction();
           }
         }, 37);
+
+        $('#graphing').addEventListener('mouseover', function () {
+          if (pregraphed == false) pregraphed = true;
+          graphFunction();
+        });
 
         $('#xi-input').addEventListener('input', function () {
           xi = Number(this.value);
@@ -353,7 +358,6 @@
         for (var i = 0; i < inputs.length; i++) {
           inputSetup(inputs[i]);
         }
-        graphFunction();
         //drawGrid(6, 1);
       });
 
