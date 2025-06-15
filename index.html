@@ -5,133 +5,175 @@
     <link href='style.css' rel='stylesheet' type='text/css'/>
     <style>
       .shown {display: block};
-      html {
+      html, #bgcontainer {
         background-color: red;
-        background-image: url(http://ebp012.github.io/anantam/bg.png);
+        background-image: url(bg.png);
         background-size: cover;
       }
     </style>
     <link href='http://aryabhata.aeonic.me/noedit.sigma.css' rel='stylesheet' type='text/css'/>
+    <link
+      rel='stylesheet'
+      href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+    />
   </head>
   <body>
-    <table class='non'>
-      <thead>
-        <tr>
-          <td class='viewport-input'><strong>x-i viewport</strong></td>
-          <td><strong>x-r trace</strong></td>
-          <td><strong>x-i trace</strong></td>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td id='xiv-td' class='viewport-input'>
-            x-iv: <input type='range' min='-36' max='36' value='0' step='1' id='xiv-input'/><br/>
-            x-iv = <span id='xiv-value'>0</span><br/>
-            x-iv Min: <input type='number' value='-36' id='xiv-min-input'/><br/>
-            x-iv Max: <input type='number' value='36' id='xiv-max-input'/><br/>
-            x-iv Step: <input type='number' value='1' min='0' id='xiv-step-input'/><br/>
-            <input type='checkbox' id='xiv-type-input' checked='checked'/> <label for='xiv-type-input'>Slider input?</label>
-          </td>
-          <td id='xr-td'>
-            x-r: <input type='range' min='-36' max='36' value='0' step='1' id='xr-input'/><br/>
-            x-r = <span id='xr-value'>0</span><br/>
-            x-r Min: <input type='number' value='-36' id='xr-min-input'/><br/>
-            x-r Max: <input type='number' value='36' id='xr-max-input'/><br/>
-            x-r Step: <input type='number' value='1' min='0' id='xr-step-input'/><br/>
-            <input type='checkbox' id='xr-type-input' checked='checked'/> <label for='xr-type-input'>Slider input?</label>
-          </td>
-          <td id='xi-td'>
-            x-i: <input type='range' min='-36' max='36' value='0' step='1' id='xi-input'/><br/>
-            x-i = <span id='xi-value'>0</span><br/>
-            x-i Min: <input type='number' value='-36' id='xi-min-input'/><br/>
-            x-i Max: <input type='number' value='36' id='xi-max-input'/><br/>
-            x-i Step: <input type='number' value='1' min='0' id='xi-step-input'/><br/>
-            <input type='checkbox' id='xi-type-input' checked='checked'/> <label for='xi-type-input'>Slider input?</label>
-          </td>
-        </tr>
-        <tr class='merged'>
-          <td class='viewport-input'>
-            <center>
-              <strong>Function</strong><br/>
-              <p id='func1'>
-                f(x) = <input id='function-input' type='text' style='font-family: times;' value='0.37x^2 - 10x'/>
-                <select id='function-colour'>
-                  <option>pink</option>
-                  <option value='red'>medium red</option>
-                  <option value='#880808'>dark red</option>
-                  <option value='#FFD580'>light orange</option>
-                  <option value='orange'>medium orange</option>
-                  <option>brown</option>
-                  <option value='#FFFDD0'>cream</option>
-                  <option>yellow</option>
-                  <option>gold</option>
-                  <option value='#90EE90'>light green</option>
-                  <option value='green'>medium green</option>
-                  <option value='#228B22'>dark green</option>
-                  <option value='#90E4C1'>light teal</option>
-                  <option value='teal'>medium teal</option>
-                  <option value='#008080'>dark teal</option>
-                  <option value='powderblue'>light blue</option>
-                  <option value='blue'>medium blue</option>
-                  <option value='navy'>navy blue</option>
-                  <option>indigo</option>
-                  <option selected='selected'>purple</option>
-                  <option>maroon</option>
-                  <option>magenta</option>
-                  <option>brown</option>
-                  <option>white</option>
-                  <option>silver</option>
-                  <option>grey</option>
-                  <option value='darkslategrey'>slate</option>
-                  <option>black</option>
-                  <option value='rgba(0,0,0,0)'>invisible</option>
-                </select>
-              </p>
+    <div id='bgcontainer'></div>
+    <div class='container'>
+      <div id='graphing' class='content-section active'>
+        <h1 class="page-title">Graphing</h1>
+        <div class="desk-paper" style='line-height: 36pt;'>
+          <table class='non'>
+            <thead>
+              <tr>
+                <td class='viewport-input'><strong>x-i viewport</strong></td>
+                <td><strong>x-r trace</strong></td>
+                <td><strong>x-i trace</strong></td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id='xiv-td' class='viewport-input'>
+                  x-iv: <input type='range' min='-36' max='36' value='0' step='1' id='xiv-input'/><br/>
+                  x-iv = <span id='xiv-value'>0</span><br/>
+                  x-iv Min: <input type='number' value='-36' id='xiv-min-input'/><br/>
+                  x-iv Max: <input type='number' value='36' id='xiv-max-input'/><br/>
+                  x-iv Step: <input type='number' value='1' min='0' id='xiv-step-input'/><br/>
+                  <input type='checkbox' id='xiv-type-input' checked='checked'/> <label for='xiv-type-input'>Slider input?</label>
+                </td>
+                <td id='xr-td'>
+                  x-r: <input type='range' min='-36' max='36' value='0' step='1' id='xr-input'/><br/>
+                  x-r = <span id='xr-value'>0</span><br/>
+                  x-r Min: <input type='number' value='-36' id='xr-min-input'/><br/>
+                  x-r Max: <input type='number' value='36' id='xr-max-input'/><br/>
+                  x-r Step: <input type='number' value='1' min='0' id='xr-step-input'/><br/>
+                  <input type='checkbox' id='xr-type-input' checked='checked'/> <label for='xr-type-input'>Slider input?</label>
+                </td>
+                <td id='xi-td'>
+                  x-i: <input type='range' min='-36' max='36' value='0' step='1' id='xi-input'/><br/>
+                  x-i = <span id='xi-value'>0</span><br/>
+                  x-i Min: <input type='number' value='-36' id='xi-min-input'/><br/>
+                  x-i Max: <input type='number' value='36' id='xi-max-input'/><br/>
+                  x-i Step: <input type='number' value='1' min='0' id='xi-step-input'/><br/>
+                  <input type='checkbox' id='xi-type-input' checked='checked'/> <label for='xi-type-input'>Slider input?</label>
+                </td>
+              </tr>
+              <tr class='merged'>
+                <td class='viewport-input'>
+                  <center>
+                    <strong>Function</strong><br/>
+                    <p id='func1'>
+                      f(x) = <input id='function-input' type='text' style='font-family: times;' value='0.37x^2 - 10x'/>
+                      <select id='function-colour'>
+                        <option>pink</option>
+                        <option value='red'>medium red</option>
+                        <option value='#880808'>dark red</option>
+                        <option value='#FFD580'>light orange</option>
+                        <option value='orange'>medium orange</option>
+                        <option>brown</option>
+                        <option value='#FFFDD0'>cream</option>
+                        <option>yellow</option>
+                        <option>gold</option>
+                        <option value='#90EE90'>light green</option>
+                        <option value='green'>medium green</option>
+                        <option value='#228B22'>dark green</option>
+                        <option value='#90E4C1'>light teal</option>
+                        <option value='teal'>medium teal</option>
+                        <option value='#008080'>dark teal</option>
+                        <option value='powderblue'>light blue</option>
+                        <option value='blue'>medium blue</option>
+                        <option value='navy'>navy blue</option>
+                        <option>indigo</option>
+                        <option selected='selected'>purple</option>
+                        <option>maroon</option>
+                        <option>magenta</option>
+                        <option>brown</option>
+                        <option>white</option>
+                        <option>silver</option>
+                        <option>grey</option>
+                        <option value='darkslategrey'>slate</option>
+                        <option>black</option>
+                        <option value='rgba(0,0,0,0)'>invisible</option>
+                      </select>
+                    </p>
 
-            </center>
-          </td>
-          <td>
-            <center>
-              <strong>Trace</strong><br/>
-              x: <span id='xri-showcase'>? + ?i</span><br/>
-              y: <span id='yri-showcase'>? + ?i</span><br/>
-              <hr/>
-              Round: 10<sup><input id='trace-round' type='number' style='font-size: calc(inherit * 0.25);' value='-3'/></sup>
-            </center>
-          </td>
-          <td>
-            <center>
-              Minor step: <input id='graph-minor-step' type='number' min='0' step='0.5' value='1' title='distance between thinner gridlines. set to 0 to disable them entirely.'/><br/>
-              Major step: <input id='graph-major-step' type='number' min='0' value='6' title='distance between thicker gridlines. set to 0 to disable them entirely.'/><br/>
-              xr-offset: <input id='graph-offset-xr' type='number' step='1' value='0'/><br/>
-              yr-offset: <input id='graph-offset-yr' type='number' step='1' value='0'/><br/>
-              yi-offset: <input id='graph-offset-yi' type='number' step='1' value='0'/><br/>
-              Tick height: <input id='graph-tick-height' type='number' step='0.5' value='2.5'/><br/>
-              <button id='graph-btn' onclick='graphFunction();'>Graph</button><br/><hr/>
-              <form>
-                X-axis<br/>
-                <input type='radio' name='graph-dimension-x' id='graph-dimension-xr' checked='checked'/><label for='graph-dimension-xr'>Real only</label><br/>
-                <input type='radio' name='graph-dimension-x' id='graph-dimension-xi'/><label for='graph-dimension-xi'>Imaginary only</label><br/>
-              </form><br/>
-              <form>
-                Y-axis<br/>
-                <input type='radio' name='graph-dimension-y' id='graph-dimension-yr' checked='checked'/><label for='graph-dimension-yr'>Real only</label><br/>
-                <input type='radio' name='graph-dimension-y' id='graph-dimension-yi'/><label for='graph-dimension-yi'>Imaginary only</label><br/>
-              </form><br/><hr/>
-              <input id='graph-ticks' type='checkbox' checked='checked'/> <label for='graph-ticks'>Tick marks?</label><br/>
-              <input id='graph-grids' type='checkbox' checked='checked'/> <label for='graph-grids'>Grid lines?</label><br/>
-              <input id='graph-points' type='checkbox' checked='checked'/> <label for='graph-points'>Graph points?</label><br/>
-              <input id='graph-dimension-3d' type='checkbox'/> <label for='graph-dimension-3d'>Enable 3D?</label><br/>
-              <input id='graph-auto' type='checkbox'/> <label for='graph-auto' title='resource-consuming'>Graph automatically?</label><br/>
-            </center>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-    <div id='graph-div'>
-      <canvas height='360' width='360' style='border: 1px solid grey;' id='graph-canvas'></canvas>
+                  </center>
+                </td>
+                <td>
+                  <center>
+                    <strong>Trace</strong><br/>
+                    x: <span id='xri-showcase'>? + ?i</span><br/>
+                    y: <span id='yri-showcase'>? + ?i</span><br/>
+                    <hr/>
+                    Round: 10<sup><input id='trace-round' type='number' style='font-size: calc(inherit * 0.25);' value='-3'/></sup>
+                  </center>
+                </td>
+                <td>
+                  <center>
+                    Minor step: <input id='graph-minor-step' type='number' min='0' step='0.5' value='1' title='distance between thinner gridlines. set to 0 to disable them entirely.'/><br/>
+                    Major step: <input id='graph-major-step' type='number' min='0' value='6' title='distance between thicker gridlines. set to 0 to disable them entirely.'/><br/>
+                    xr-offset: <input id='graph-offset-xr' type='number' step='1' value='0'/><br/>
+                    yr-offset: <input id='graph-offset-yr' type='number' step='1' value='0'/><br/>
+                    yi-offset: <input id='graph-offset-yi' type='number' step='1' value='0'/><br/>
+                    Tick height: <input id='graph-tick-height' type='number' step='0.5' value='2.5'/><br/>
+                    <button id='graph-btn' onclick='graphFunction();'>Graph</button><br/><hr/>
+                    <form>
+                      X-axis<br/>
+                      <input type='radio' name='graph-dimension-x' id='graph-dimension-xr' checked='checked'/><label for='graph-dimension-xr'>Real only</label><br/>
+                      <input type='radio' name='graph-dimension-x' id='graph-dimension-xi'/><label for='graph-dimension-xi'>Imaginary only</label><br/>
+                    </form><br/>
+                    <form>
+                      Y-axis<br/>
+                      <input type='radio' name='graph-dimension-y' id='graph-dimension-yr' checked='checked'/><label for='graph-dimension-yr'>Real only</label><br/>
+                      <input type='radio' name='graph-dimension-y' id='graph-dimension-yi'/><label for='graph-dimension-yi'>Imaginary only</label><br/>
+                    </form><br/><hr/>
+                    <input id='graph-ticks' type='checkbox' checked='checked'/> <label for='graph-ticks'>Tick marks?</label><br/>
+                    <input id='graph-grids' type='checkbox' checked='checked'/> <label for='graph-grids'>Grid lines?</label><br/>
+                    <input id='graph-points' type='checkbox' checked='checked'/> <label for='graph-points'>Graph points?</label><br/>
+                    <input id='graph-dimension-3d' type='checkbox'/> <label for='graph-dimension-3d'>Enable 3D?</label><br/>
+                    <input id='graph-auto' type='checkbox'/> <label for='graph-auto' title='resource-consuming'>Graph automatically?</label><br/>
+                  </center>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <center>
+            <div id='graph-div'>
+              <canvas height='360' width='360' style='border: 1px solid grey;' id='graph-canvas'></canvas>
+            </div>
+          </center>
+        </div>
+      </div>
     </div>
-    
+
+
+    <nav class='nav-bar'>
+      <div class='nav-item' data-target='#graphing' id='homeTab'>
+        <i class='fa-solid fa-pencil'></i>
+        Graphing
+      </div>
+      <div class='nav-item' data-target='#scientific'>
+        <i class='fa-solid fa-calculator'></i>
+        Scientific
+      </div>
+      <div class='nav-item' data-target='#algebra'>
+        <i class='fa-solid fa-microchip'></i>
+        Algebra
+      </div>
+      <div class='nav-item' data-target='#units'>
+        <i class='fa-solid fa-ruler'></i>
+        Units
+      </div>
+      <div class='nav-item' data-target='#chemistry'>
+        <i class='fa-solid fa-flask'></i>
+        Chemistry
+      </div>
+      <div class='nav-item' data-target='#more'>
+        <i class='fa-solid fa-motorcycle'></i>
+        More
+      </div>
+    </nav>
+
 
     <script>
       // Axes and Trace Variables
@@ -163,6 +205,7 @@
       var toffyi = 0; // total yi-offset
 
       window.addEventListener('load', function() {
+        document.querySelector('#homeTab').click(); pascal.addDimension();
         setInterval(function() {
           // Update whether graph is 2D or 3D
           if ($('#graph-dimension-3d').checked == true) {
@@ -536,6 +579,25 @@
           }
         }
       }
+
+      // Navbar function
+      $(document).ready(function () {
+        SettingsManager.init();
+
+        // Existing navigation code
+        $('.nav-item').click(function () {
+          const target = $(this).data('target');
+          $('.content-section').removeClass('active');
+          $(target).addClass('active');
+          $('.nav-item').css({
+            transform: 'translateY(0)',
+            background: 'transparent',
+          });
+          $(this)
+            .css('background', 'rgba(255,255,255,0.3)')
+            .css('transform', 'translateY(-5px)');
+        });
+      });
     </script>
     <style>input[type=number]{max-width:100px;}</style>
     
