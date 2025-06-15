@@ -3,10 +3,13 @@
   <head>
     <title>Anantam</title>
     <link href='style.css' rel='stylesheet' type='text/css'/>
+    <style>
+      .shown {display: block};
+    </style>
     <link href='http://aryabhata.aeonic.me/noedit.sigma.css' rel='stylesheet' type='text/css'/>
   </head>
   <body>
-    <table style='border: 1px solid black; border-collapse: collapse; background-color: white;' class='non'>
+    <table class='non'>
       <thead>
         <tr>
           <td class='viewport-input'><strong>x-i viewport</strong></td>
@@ -46,7 +49,7 @@
             <center>
               <strong>Function</strong><br/>
               <p id='func1'>
-                f(x) = <input id='function-input' type='text' style='font-family: times;' value='math.add(math.multiply(0.037, math.pow(num, 2)), math.subtract(num, 10))'/>
+                f(x) = <input id='function-input' type='text' style='font-family: times;' value='0.37x^2 - 10x'/>
                 <select id='function-colour'>
                   <option>pink</option>
                   <option value='red'>medium red</option>
@@ -112,6 +115,7 @@
               </form><br/><hr/>
               <input id='graph-ticks' type='checkbox' checked='checked'/> <label for='graph-ticks'>Tick marks?</label><br/>
               <input id='graph-grids' type='checkbox' checked='checked'/> <label for='graph-grids'>Grid lines?</label><br/>
+              <input id='graph-points' type='checkbox' checked='checked'/> <label for='graph-points'>Graph points?</label><br/>
               <input id='graph-dimension-3d' type='checkbox'/> <label for='graph-dimension-3d'>Enable 3D?</label><br/>
               <input id='graph-auto' type='checkbox'/> <label for='graph-auto' title='resource-consuming'>Graph automatically?</label><br/>
             </center>
@@ -250,7 +254,7 @@
         });
 
         $('#function-input').addEventListener('input', function () {
-          func = eval($('#function-input').value);
+          //func = eval($('#function-input').value);
         });
 
         function resetOffset () {
@@ -468,14 +472,18 @@
         let func2D = (0.037) * x ** 2 + x - 10; //eval($('#function-input').value);
         return round(func2D, Number($('#trace-round').value));
       }
-      function solve (x, i, solveComplex) {
-        // solve y = x^2/9 + x - 1
-        let num = math.complex(x, i);
-        //let func = (0.037) * num.re ** 2 + x - 10; //eval($('#function-input').value);
-        //let func = math.add(math.multiply(0.037, math.pow(num, 2)), math.subtract(num, 10));
-        let func = eval($('#function-input').value);
-        //let func = getFunction($('#function-input').value.toString());
-        //let func = math.divide(1, num);
+      function countOccurrences(str, search) {
+        return str.split(search).length - 1;
+      }
+      function solve (x, i, solveComplex, whence) {
+        if (whence == undefined) whence = 1;
+        // Read the function input
+        let scope = { x: math.complex(x, i) };
+        var functext = $('#function-input').value.toString();
+        // Constant Functions
+        if (countOccurrences(functext, 'x') == 0) functext = '(' + functext + ')x^0';
+        // Finalise the function
+        let func = math.evaluate(functext, scope);
         if (solveComplex == false || solveComplex == undefined) {
           return round(func.re, Number($('#trace-round').value));
         }
@@ -496,6 +504,7 @@
         ctx.lineWidth = 1;
         //ctx.translate(180, 180);
         for (var i = -180; i < 180; i += 5/10) {
+          // The linear graph
           var xrt = i;
           var yrt = -solve(xrt, Number($('#xiv-input').value), false);
           var xrtNext = i + 5/10;
@@ -504,13 +513,27 @@
             yrt = -solve(Number($('#xiv-input').value), xrt, false);
             yrtNext = -solve(Number($('#xiv-input').value), xrtNext, false)
           }
+          // Division by zero in rational functions
+          if (yrtNext == -Infinity) yrtNext = -360;
+          if (yrt == Infinity) yrt = 360;
           ctx.beginPath();
           ctx.moveTo(xrt, yrt);
           ctx.lineTo(xrtNext, yrtNext);
           ctx.stroke();
+          // The pointed graph
+          if (i % Number($('#graph-major-step').value) == 0 && $('#graph-points').checked == true) {
+            ctx.beginPath();
+            ctx.arc(xrt, yrt, 1.25, 0, 2 * Math.PI);
+            ctx.fillStyle = $('#function-colour').value;
+            ctx.fill();
+            ctx.lineWidth = 0;
+            ctx.stroke();
+          }
         }
       }
     </script>
+    <style>input[type=number]{max-width:100px;}</style>
+    
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.2/math.js'></script>
   </body>
 </html>
