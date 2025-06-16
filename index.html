@@ -5,7 +5,11 @@
     <link href='style.css' rel='stylesheet' type='text/css'/>
     <style>
       .shown {display: block};
+      #bgcontainer {
+        background: url(http://anantam.aeonic.me/bg.png);
+      }
     </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <link href='http://aryabhata.aeonic.me/noedit.sigma.css' rel='stylesheet' type='text/css'/>
     <link
       rel='stylesheet'
@@ -13,7 +17,7 @@
     />
   </head>
   <body>
-    <div id='bgcontainer' style='background: url(http://anantam.aeonic.me/bg.png); background-size: cover; background-position: center; height: 100vh;'></div>
+    <div id='bgcontainer' style='background: url(http://anantam.aeonic.me/bg.png); background-size: cover; background-position: center; height: 100vh; filter: sepia(87%);'></div>
     <div class='container'>
       <div id='graphing' class='content-section active'>
         <h1 class="page-title">Graphing</h1>
@@ -137,6 +141,63 @@
               <canvas height='360' width='360' style='border: 1px solid grey;' id='graph-canvas'></canvas>
             </div>
           </center>
+        </div>
+      </div>
+      <div id='scientific' class='content-section'>
+        <h1 class="page-title">Scientific</h1>
+        <div class="desk-paper" style='line-height: 36pt;'>
+          <form name="calculator" >
+            <input type="textfield" id="resultFake" name="ansTwo" placeholder="0." style="width: 100%; font-family: display, futura, georgia; margin: 5px; padding: 10px; color: red; background: black; outline: 0;" readonly='readonly' oncontextmenu='return false;eToggle("ans", "block", "ansTwo", "none");'><br>
+              <input type="textfield" id='result' name="ans" value="" style='width: 100%; display: none;' oncontextmenu='return false; eToggle("ansTwo", "block", "result", "none");'>
+              <table class='non'>
+                <thead>
+                  <tr>
+                    <td><input type="button" value="=" onClick="document.calculator.ans.value=eval(document.calculator.ans.value);document.calculator.ansTwo.value=eval(document.calculator.ans.value)" title='Show solution: Equals Sign' class='calb caln'/></td>
+                    <td><input type="button" value="HYPR" onclick="toggleHyperMode();" title='Toggle Hyper mode' class='calb cala'/></td>
+                    <td><input type="reset" value="AC" title='All Clear' class='calb caln'/></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class='numrow'>
+                    <td><input type='button' value='1ⁱ' onClick="document.calculator.ans.value+='1';document.calculator.ansTwo.value+='1';" class='calb caln'/></td>
+                    <td><input type='button' value='2²' onClick="document.calculator.ans.value+='2';document.calculator.ansTwo.value+='2';" class='calb caln'/></td>
+                    <td><input type="button" value="3³" onClick="document.calculator.ans.value+='3';document.calculator.ansTwo.value+='3';" class='calb caln'/></td>
+                    <td><input type="button" value="+" onClick="document.calculator.ans.value+='+';document.calculator.ansTwo.value+='+';" class='calb calo'/></td>
+                    <td><input type="button" value="aⁿ" onClick="document.calculator.ans.value+='**';document.calculator.ansTwo.value+='^';" class='calb calo'/></td>
+                  </tr>
+                  <tr class='numrow'>
+                    <td><input type="button" value="4ⁿʳᵗ" onClick="document.calculator.ans.value+='4';document.calculator.ansTwo.value+='4';" class='calb caln'/></td>
+                    <td><input type="button" value="5ˢʳᵗ" onClick="document.calculator.ans.value+='5';document.calculator.ansTwo.value+='5';" class='calb caln'/></td>
+                    <td><input type="button" value="6ᶜᵇʳᵗ" onClick="document.calculator.ans.value+='6';document.calculator.ansTwo.value+='6';" class='calb caln'/></td>
+                    <td><input type="button" value="-" onClick="document.calculator.ans.value+='-';document.calculator.ansTwo.value+='-';" class='calb calo'/></td>
+                    <td><input type="button" value="ⁿa" onClick="document.calculator.ans.value+='tet(';document.calculator.ansTwo.value+='tet(';" class="calo" title="Tetration"/></td>
+                  </tr>
+                  <tr class='numrow'>
+                    <td><input type="button" value="7" onClick="document.calculator.ans.value+='7';document.calculator.ansTwo.value+='7';" class='calb caln'/></td>
+                    <td><input type="button" value="8" onClick="document.calculator.ans.value+='8';document.calculator.ansTwo.value+='8';" class='calb caln'/></td>
+                    <td><input type="button" value="9" onClick="document.calculator.ans.value+='9';document.calculator.ansTwo.value+='9';" class='calb caln'/></td>
+                    <td><input type="button" value="&times;" onClick="document.calculator.ans.value+='*';document.calculator.ansTwo.value+='&bull;';" class='calb calo'/></td>
+                  </tr>
+                  <tr class='numrow'>
+                    <td><input type='button' value='.' onClick="document.calculator.ans.value+='.';document.calculator.ansTwo.value+='.';" title='Decimal' class='calb cala'/></td>
+                    <td><input type="button" value="0" onClick="document.calculator.ans.value+='0';document.calculator.ansTwo.value+='0';" title='Zero' class='calb caln'/></td>
+                    <td><input type='button' value=',' onClick="document.calculator.ans.value+=',';document.calculator.ansTwo.value+=',';" title='Comma' class='calb cala'/></td>
+                    <td><input type="button" value="÷" onClick="document.calculator.ans.value+='/';document.calculator.ansTwo.value+='÷';" class='calb calo'/></td>
+                    <td><input type="button" value="R" onClick="document.calculator.ans.value+='%';document.calculator.ansTwo.value+='R';" class='calb calo'/></td>
+                  </tr>
+                  <tr class='numrow'>
+                    <td><input type='button' value='(' onClick="document.calculator.ans.value+='(';document.calculator.ansTwo.value+='(';" title='Opening Parentheses' class='calb cala'/></td>
+                    <td><input type='button' value=')' onClick="document.calculator.ans.value+=')';document.calculator.ansTwo.value+=')';" title='Closing Parentheses' class='calb cala'/></td>
+                  </tr>
+                  <tr class="numrow">
+                    <td><input type="button" value="x" onClick="document.calculator.ans.value+='x';document.calculator.ansTwo.value+='x';" class='calb calv' disabled='disabled'/></td>
+                    <td><input type="button" value="y" onClick="document.calculator.ans.value+='y';document.calculator.ansTwo.value+='y';" class='calb calv' disabled='disabled'/></td>
+                    <td><input type='button' value='&pi;' onclick='document.calculator.ans.value+="3.14159265358979323846264";document.calculator.ansTwo.value+="&pi;";'  class='calb cala'/></td>
+                    <td><input type="button" value="e" onclick="document.calculator.ans.value+='2.71828182845904523536028';document.calculator.ansTwo.value+='e';" class='calb cala'/></td>
+                  </tr>
+                </tbody>
+              </table>
+            </form>
         </div>
       </div>
     </div>
@@ -597,9 +658,293 @@
             .css('transform', 'translateY(-5px)');
         });
       });
+
+
+      // Scientific Calculator
+      function tet(x,y) {
+        if (y == 2) {
+          return x ** y;
+        }
+        else if (y == 1) {return x;}
+        else {
+          var r = BigInt(x); // r = result of exponentiation
+          for (var i=0n; i <= BigInt(y-2); i++) {
+            r = BigInt(x ** r);
+          }
+          if (y == 0) {return 1;}
+          return r;
+        }
+      }
+      function nrt(exp, num) {
+        Math.pow(exp, 1/num);
+      }
+      function factorial (a) {
+        var i = 1;
+        while (i <= a) {
+          r = BigInt(r * i); // Multiply result by the current iteration i
+          i = BigInt(i + 1);           // Increment the iteration counter
+        }
+        return r;
+      }
+      var hyperMode = false; // Initially not in hyper mode
+      function toggleHyperMode () {
+        hyperMode = !hyperMode;
+        toggleHyperMode1();
+        toggleHyperMode2();
+      }
+      function toggleHyperMode1() {
+          var hyperButton = document.querySelector('.calb[value="HYPR"]');
+          if (hyperMode == true) {
+            console.log("Hypermode is active")
+            // Toggle the functionality of the buttons based on hyper mode
+            var buttonsToUpdate = [
+                { value: "^^", replacementValue: "ln", onclick: function() { appendText('ln('); } },
+                { value: "^", replacementValue: "n√", onclick: function() { appendText('nthRoot('); } },
+                { value: "1ⁱ", replacementValue: "i", onclick: function() { document.calculator.ans.value+="sqrt(-1)";document.calculator.ansTwo.value+='i'; } },
+                { value: "2²", replacementValue: "²", onclick: function() { document.calculator.ans.value+="** 2";document.calculator.ansTwo.value+='²'; } },
+                { value: "3³", replacementValue: "³", onclick: function() { document.calculator.ans.value+="** 3";document.calculator.ansTwo.value+='³'; } },
+                { value: "4ⁿʳᵗ", replacementValue: "ⁿ√", onclick: function() { document.calculator.ans.value+="nrt(";document.calculator.ansTwo.value+='nrt('; } },
+                { value: "5ˢʳᵗ", replacementValue: "√", onclick: function() { document.calculator.ans.value+="sqrt($";document.calculator.ansTwo.value+='√('; } },
+                { value: "6ᶜᵇʳᵗ", replacementValue: "∛", onclick: function() { appendText('cbrt($'); } },
+                { value: "8", replacementValue: "!", onclick: function() { appendText('factorial('); } },
+                { value: "9", replacementValue: "log₂", onclick: function() { appendText('log2('); } },
+                { value: "(-)", replacementValue: "%", onclick: function() { appendText('%'); } },
+                { value: "0", replacementValue: "log₁₀", onclick: function() { appendText('log10('); } },
+            ];
+        
+            buttonsToUpdate.forEach(button => {
+                var buttonElement = document.querySelector(`input[type="button"][value="${button.value}"].calb`);
+                if (buttonElement) {
+                    if (hyperMode) {
+                        buttonElement.value = button.replacementValue;
+                        buttonElement.onclick = button.onclick;
+                    } else {
+                        buttonElement.value = button.value;
+                        buttonElement.onclick = function() { appendText(button.value); };
+                    }
+                }
+            });
+          }
+          else {
+            // Revert the buttons to their original values and functionalities
+            var buttonsToRevert = [
+              { value: "i", originalValue: "1ⁱ", onclick: function() { appendText('1'); } },
+              { value: "²", originalValue: "2²", onclick: function() { appendText('2'); } },
+              { value: "³", originalValue: "3³", onclick: function() { appendText('3'); } },
+              { value: "ⁿ√", originalValue: "4ⁿʳᵗ", onclick: function() { appendText('4'); } },
+              { value: "√", originalValue: "5ˢʳᵗ", onclick: function() { appendText('5'); } },
+              { value: "∛", originalValue: "6ᶜᵇʳᵗ", onclick: function() { appendText('6'); } },
+              { value: "!", originalValue: "8", onclick: function() { appendText('8'); } },
+              { value: "log₂", originalValue: "9", onclick: function() { appendText('9'); } },
+              { value: "log₁₀", originalValue: "0", onclick: function() { appendText('0'); } },
+            ];
+        
+            buttonsToRevert.forEach(button => {
+                var buttonElement = document.querySelector(`input[type="button"][value="${button.value}"].calb`);
+                if (buttonElement) {
+                    buttonElement.value = button.originalValue;
+                    buttonElement.onclick = button.onclick;
+                }
+            });
+          }
+        console.log("Task completed successfully");
+      }
+      function toggleHyperMode2() {
+          var hyperButton = document.querySelector('.calo[value="HYPR"]');
+          if (hyperMode == true) {
+            console.log("Hypermode is active")
+            // Toggle the functionality of the buttons based on hyper mode
+            var buttonsToUpdate = [
+                { value: "^^", replacementValue: "ln", onclick: function() { appendText('ln('); } },
+                { value: "^", replacementValue: "n√", onclick: function() { appendText('nthRoot('); } },
+            ];
+        
+            buttonsToUpdate.forEach(button => {
+                var buttonElement = document.querySelector(`input[type="button"][value="${button.value}"].calb`);
+                if (buttonElement) {
+                    if (hyperMode) {
+                        buttonElement.value = button.replacementValue;
+                        buttonElement.onclick = button.onclick;
+                    } else {
+                        buttonElement.value = button.value;
+                        buttonElement.onclick = function() { appendText(button.value); };
+                    }
+                }
+            });
+          }
+          else {
+            // Revert the buttons to their original values and functionalities
+            var buttonsToRevert = [
+              { value: "^^", originalValue: "ln", onclick: function() { appendText('^^'); } },
+              { value: "^", originalValue: "n√", onclick: function() { appendText('**'); } },
+            ];
+        
+            buttonsToRevert.forEach(button => {
+                var buttonElement = document.querySelector(`input[type="button"][value="${button.value}"].calo`);
+                if (buttonElement) {
+                    buttonElement.value = button.originalValue;
+                    buttonElement.onclick = button.onclick;
+                }
+            });
+          }
+        console.log("Task completed successfully");
+      }
+      function evaluateExpression() {
+          var ansField = document.calculator.ans;
+          var ansTwoField = document.calculator.ansTwo;
+          
+          ansField.value = eval(ansField.value);
+          ansTwoField.value = eval(ansTwoField.value);
+      }
+
+      function appendText(text) {
+          var ansField = document.calculator.ans;
+          var ansTwoField = document.calculator.ansTwo;
+          
+          ansField.value += text;
+          ansTwoField.value += text;
+      }
+
+      
+      var fakeResult = document.getElementById('resultFake');
+      document.addEventListener("keydown", function (event) {
+        if (event.key === "Shift") {
+          toggleHyperMode();
+        }
+      });
+
+      document.addEventListener("keyup", function (event) {
+        if (event.key === "Shift") {
+          toggleHyperMode();
+        }
+      });
     </script>
     <style>input[type=number]{max-width:100px;}</style>
     
     <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.2/math.js'></script>
+    <style>
+      @font-face {
+        font-family: 'display';
+        src: url('display.ttf') format('truetype');
+      }
+      /* The browser window */
+      #scientific .calcinterface {
+        border: 3px solid #f1f1f1;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+      }
+      
+      /* Container for columns and the top "toolbar" */
+      #scientific .row {
+        padding: 10px;
+        background: navy;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+      }
+      
+      /* Create three unequal columns that floats next to each other */
+      #scientific .column {
+        float: left;
+      }
+      
+      #scientific .left {
+        width: 15%;
+      }
+      
+      #scientific .right {
+        width: 10%;
+      }
+      
+      #scientific .middle {
+        width: 75%;
+      }
+      
+      /* Clear floats after the columns */
+      #scientific .row:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+      
+      /* Three dots */
+      #scientific .dot {
+        margin-top: 4px;
+        height: 12px;
+        width: 12px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+        border: 1px solid white;
+      }
+      
+      /* Style the input field */
+      #scientific input[type=text] {
+        width: 100%;
+        border-radius: 3px;
+        border: none;
+        background-color: white;
+        margin-top: -8px;
+        height: 25px;
+        color: #666;
+        padding: 5px;
+      }
+      
+      /* Three bars (hamburger menu) */
+      #scientific .bar {
+        width: 17px;
+        height: 3px;
+        background-color: #aaa;
+        margin: 3px 0;
+        display: block;
+      }
+      
+      /* Page content */
+      #scientific .clontent {
+        padding: 10px;
+      }
+      #scientific .calb {
+        border: 3.5px solid black;
+        margin-right: 0px;
+      }
+      #scientific .caln {
+        background-color: gold;
+      }
+      #scientific .cala {
+        background-color: silver;
+        border: 3.5px solid black;
+        margin-right: 0px;
+      }
+      #scientific .calo {
+        background-color: #967444;
+        border: 3.5px solid black;
+        margin-right: 0px;
+      }
+      .cala, .calb, .calo {width:20%;height:20%;height:120px;font-size:80px}
+      #scientific #result, #scientific #resultFake {
+        border: 4px solid green;
+        background-color: #967444;
+        color: green;
+        height: 54px;
+        font-weight: bold;
+        font-size: 42px;
+        overflow: auto;
+      }
+      #scientific .calv {
+        background-color: #FF9900; /* Customize the color as needed */
+        border: 3.5px solid black;
+        margin-right: 0px;
+      }
+      #scientific div#calculator {
+        width: 100%;
+        background-color: black;
+      }
+      /*#scientific .numrow {display: flex; width: 100%;}*/
+      #scientific form table {width: 100%;}
+      #scientific table td {width: 20%;}
+      #scientific table td input[type] {width: 100%; font-family: futura; font-size: 30px;}
+      #scientific #resultFake::placeholder {
+        color: red;
+      }
+    </style>
   </body>
 </html>
