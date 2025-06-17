@@ -28,6 +28,7 @@
                 <td class='viewport-input'><strong>x-i viewport</strong></td>
                 <td><strong>x-r trace</strong></td>
                 <td><strong>x-i trace</strong></td>
+                <td onclick='graphFunction();' style='cursor: pointer;'><strong>graph</strong></td>
               </tr>
             </thead>
             <tbody>
@@ -35,33 +36,69 @@
                 <td id='xiv-td' class='viewport-input'>
                   x-iv: <input type='range' min='-36' max='36' value='0' step='1' id='xiv-input'/><br/>
                   x-iv = <span id='xiv-value'>0</span><br/>
-                  x-iv Min: <input type='number' value='-36' id='xiv-min-input'/><br/>
-                  x-iv Max: <input type='number' value='36' id='xiv-max-input'/><br/>
-                  x-iv Step: <input type='number' value='1' min='0' id='xiv-step-input'/><br/>
+                  <div class='graph-adv'>
+                    x-iv Min: <input type='number' value='-36' id='xiv-min-input'/><br/>
+                    x-iv Max: <input type='number' value='36' id='xiv-max-input'/><br/>
+                    x-iv Step: <input type='number' value='1' min='0' id='xiv-step-input'/><br/>
+                  </div>
                   <input type='checkbox' id='xiv-type-input' checked='checked'/> <label for='xiv-type-input'>Slider input?</label>
                 </td>
                 <td id='xr-td'>
                   x-r: <input type='range' min='-36' max='36' value='0' step='1' id='xr-input'/><br/>
                   x-r = <span id='xr-value'>0</span><br/>
-                  x-r Min: <input type='number' value='-36' id='xr-min-input'/><br/>
-                  x-r Max: <input type='number' value='36' id='xr-max-input'/><br/>
-                  x-r Step: <input type='number' value='1' min='0' id='xr-step-input'/><br/>
+                  <div class='graph-adv'>
+                    x-r Min: <input type='number' value='-36' id='xr-min-input'/><br/>
+                    x-r Max: <input type='number' value='36' id='xr-max-input'/><br/>
+                    x-r Step: <input type='number' value='1' min='0' id='xr-step-input'/><br/>
+                  </div>
                   <input type='checkbox' id='xr-type-input' checked='checked'/> <label for='xr-type-input'>Slider input?</label>
                 </td>
                 <td id='xi-td'>
                   x-i: <input type='range' min='-36' max='36' value='0' step='1' id='xi-input'/><br/>
                   x-i = <span id='xi-value'>0</span><br/>
-                  x-i Min: <input type='number' value='-36' id='xi-min-input'/><br/>
-                  x-i Max: <input type='number' value='36' id='xi-max-input'/><br/>
-                  x-i Step: <input type='number' value='1' min='0' id='xi-step-input'/><br/>
+                  <div class='graph-adv'>
+                    x-i Min: <input type='number' value='-36' id='xi-min-input'/><br/>
+                    x-i Max: <input type='number' value='36' id='xi-max-input'/><br/>
+                    x-i Step: <input type='number' value='1' min='0' id='xi-step-input'/><br/>
+                  </div>
                   <input type='checkbox' id='xi-type-input' checked='checked'/> <label for='xi-type-input'>Slider input?</label>
+                </td>
+                <td rowspan='2'>
+                  <center>
+                    Minor step: <input id='graph-minor-step' type='number' min='0' step='0.5' value='1' title='distance between thinner gridlines. set to 0 to disable them entirely.'/><br/>
+                    Major step: <input id='graph-major-step' type='number' min='0' value='6' title='distance between thicker gridlines. set to 0 to disable them entirely.'/><br/>
+                    xr-offset: <input id='graph-offset-xr' type='number' step='1' value='0'/><br/>
+                    yr-offset: <input id='graph-offset-yr' type='number' step='1' value='0'/><br/>
+                    yi-offset: <input id='graph-offset-yi' type='number' step='1' value='0'/><br/>
+                    <div class='graph-adv'>
+                      Tick height: <input id='graph-tick-height' type='number' step='0.5' value='2.5'/><br/>
+                      <button id='graph-btn' onclick='graphFunction();'>Graph</button><br/><hr/>
+                      <form>
+                        X-axis<br/>
+                        <input type='radio' name='graph-dimension-x' id='graph-dimension-xr' checked='checked'/><label for='graph-dimension-xr'>Real only</label><br/>
+                        <input type='radio' name='graph-dimension-x' id='graph-dimension-xi'/><label for='graph-dimension-xi'>Imaginary only</label><br/>
+                      </form><br/>
+                      <form>
+                        Y-axis<br/>
+                        <input type='radio' name='graph-dimension-y' id='graph-dimension-yr' checked='checked'/><label for='graph-dimension-yr'>Real only</label><br/>
+                        <input type='radio' name='graph-dimension-y' id='graph-dimension-yi'/><label for='graph-dimension-yi'>Imaginary only</label><br/>
+                      </form><br/>
+                    </div>
+                    <hr/>
+                    <input id='graph-ticks' type='checkbox' checked='checked'/> <label for='graph-ticks'>Tick marks?</label><br/>
+                    <input id='graph-grids' type='checkbox' checked='checked'/> <label for='graph-grids'>Grid lines?</label><br/>
+                    <input id='graph-points' type='checkbox' checked='checked'/> <label for='graph-points'>Graph points?</label><br/>
+                    <input id='graph-dimension-3d' type='checkbox'/> <label for='graph-dimension-3d'>Enable 3D?</label><br/>
+                    <input id='graph-auto' type='checkbox' checked='checked'/> <label for='graph-auto' title='resource-consuming'>Graph automatically?</label><br/>
+                    <input id='graph-advanced' type='checkbox'/> <label for='graph-advanced'>Advanced options?</label><br/>
+                  </center>
                 </td>
               </tr>
               <tr class='merged'>
-                <td class='viewport-input'>
+                <td class='viewport-input' colspan='2'>
                   <center>
                     <strong>Function</strong><br/>
-                    <p id='func1'>
+                    <p class='equation'>
                       f(x) = <input id='function-input' type='text' style='font-family: times;' value='0.37x^2 - 10x'/>
                       <select id='function-colour'>
                         <option>pink</option>
@@ -94,8 +131,9 @@
                         <option>black</option>
                         <option value='rgba(0,0,0,0)'>invisible</option>
                       </select>
+                      <button class='fa fa-trash'></button>
                     </p>
-
+                    <button class='fa fa-plus' id='equation-new'></button>
                   </center>
                 </td>
                 <td>
@@ -107,32 +145,7 @@
                     Round: 10<sup><input id='trace-round' type='number' style='font-size: calc(inherit * 0.25);' value='-3'/></sup>
                   </center>
                 </td>
-                <td>
-                  <center>
-                    Minor step: <input id='graph-minor-step' type='number' min='0' step='0.5' value='1' title='distance between thinner gridlines. set to 0 to disable them entirely.'/><br/>
-                    Major step: <input id='graph-major-step' type='number' min='0' value='6' title='distance between thicker gridlines. set to 0 to disable them entirely.'/><br/>
-                    xr-offset: <input id='graph-offset-xr' type='number' step='1' value='0'/><br/>
-                    yr-offset: <input id='graph-offset-yr' type='number' step='1' value='0'/><br/>
-                    yi-offset: <input id='graph-offset-yi' type='number' step='1' value='0'/><br/>
-                    Tick height: <input id='graph-tick-height' type='number' step='0.5' value='2.5'/><br/>
-                    <button id='graph-btn' onclick='graphFunction();'>Graph</button><br/><hr/>
-                    <form>
-                      X-axis<br/>
-                      <input type='radio' name='graph-dimension-x' id='graph-dimension-xr' checked='checked'/><label for='graph-dimension-xr'>Real only</label><br/>
-                      <input type='radio' name='graph-dimension-x' id='graph-dimension-xi'/><label for='graph-dimension-xi'>Imaginary only</label><br/>
-                    </form><br/>
-                    <form>
-                      Y-axis<br/>
-                      <input type='radio' name='graph-dimension-y' id='graph-dimension-yr' checked='checked'/><label for='graph-dimension-yr'>Real only</label><br/>
-                      <input type='radio' name='graph-dimension-y' id='graph-dimension-yi'/><label for='graph-dimension-yi'>Imaginary only</label><br/>
-                    </form><br/><hr/>
-                    <input id='graph-ticks' type='checkbox' checked='checked'/> <label for='graph-ticks'>Tick marks?</label><br/>
-                    <input id='graph-grids' type='checkbox' checked='checked'/> <label for='graph-grids'>Grid lines?</label><br/>
-                    <input id='graph-points' type='checkbox' checked='checked'/> <label for='graph-points'>Graph points?</label><br/>
-                    <input id='graph-dimension-3d' type='checkbox'/> <label for='graph-dimension-3d'>Enable 3D?</label><br/>
-                    <input id='graph-auto' type='checkbox' checked='checked'/> <label for='graph-auto' title='resource-consuming'>Graph automatically?</label><br/>
-                  </center>
-                </td>
+                
               </tr>
             </tbody>
           </table>
@@ -409,6 +422,8 @@
       var xrmin = -36, xrmax = 36; // x-real minimum/maximum
       var ximin = -36, ximax = 36; // x-imaginary minimum/maximum
 
+      const scale = 5;
+
       // Convenience stuff
       const $ = (selector) => document.querySelector(selector);
 
@@ -427,6 +442,9 @@
 
       window.addEventListener('load', function() {
         document.querySelector('#homeTab').click();
+        document.querySelectorAll('.graph-adv').forEach(function(element) {
+            element.classList.add('hidden');
+        });
         setInterval(function() {
           // Update whether graph is 2D or 3D
           if ($('#graph-dimension-3d').checked == true) {
@@ -530,6 +548,102 @@
         $('#function-input').addEventListener('input', function () {
           //func = eval($('#function-input').value);
         });
+
+        canvas.addEventListener('mousewheel', function (e) {
+          e.preventDefault();
+          // Vertical scrolling
+          if (event.deltaY > 0) {
+            // Scroll down; ideally decrease y-i viewport
+            xiv -= 1;
+            $('#xiv-input').value = xiv;
+            $('#xiv-value').innerHTML = xiv;
+          }
+          else if (event.deltaY < 0) {
+            // Scroll up; ideally increase y-i viewport
+            xiv += 1;
+            $('#xiv-input').value = xiv;
+            $('#xiv-value').innerHTML = xiv;
+          }
+          // Horizontal scrolling
+          if (event.deltaX > 0) {
+            // Scroll left; decrease x-i viewport
+            xiv -= $('xiv-step-input').value;
+            $('#xiv-input').value = xiv;
+            $('#xiv-value').innerHTML = xiv;
+          }
+          else if (event.deltaX < 0) {
+            // Scroll right; increase x-i viewport
+            xiv += $('xiv-step-input').value;
+            $('#xiv-input').value = xiv;
+            $('#xiv-value').innerHTML = xiv;
+          }
+          graphFunction();
+        });
+
+        $('#xiv-td').addEventListener('mousewheel', function (e) {
+          // Horizontal scrolling
+          if (event.deltaX > 0) {
+            // Scroll left
+            xiv -= $('xiv-step-input').value;
+            $('#xiv-input').value = xiv;
+            $('#xiv-value').innerHTML = xiv;
+          }
+          else if (event.deltaX < 0) {
+            // Scroll right
+            xiv += $('xiv-step-input').value;
+            $('#xiv-input').value = xiv;
+            $('#xiv-value').innerHTML = xiv;
+          }
+          graphFunction();
+        });
+
+        $('#xr-td').addEventListener('mousewheel', function (e) {
+          // Horizontal scrolling
+          if (event.deltaX > 0) {
+            // Scroll left
+            xr -= $('xr-step-input').value;
+            $('#xr-input').value = xr;
+            $('#xr-value').innerHTML = xr;
+          }
+          else if (event.deltaX < 0) {
+            // Scroll right
+            xr += $('xr-step-input').value;
+            $('#xr-input').value = xr;
+            $('#xr-value').innerHTML = xr;
+          }
+          graphFunction();
+        });
+
+        $('#xi-td').addEventListener('mousewheel', function (e) {
+          // Horizontal scrolling
+          if (event.deltaX > 0) {
+            // Scroll left
+            xi -= $('xi-step-input').value;
+            $('#xi-input').value = xi;
+            $('#xi-value').innerHTML = xi;
+          }
+          else if (event.deltaX < 0) {
+            // Scroll right
+            xi += $('xi-step-input').value;
+            $('#xi-input').value = xi;
+            $('#xi-value').innerHTML = xi;
+          }
+          graphFunction();
+        });
+
+        $('#graph-advanced').addEventListener('input', function () {
+          const graphAdvElements = document.querySelectorAll('.graph-adv');
+          
+          if (!this.checked) {
+              graphAdvElements.forEach(function(element) {
+                  element.classList.add('hidden');
+              });
+          } else {
+              graphAdvElements.forEach(function(element) {
+                  element.classList.remove('hidden');
+              });
+          }
+      });
 
         function resetOffset () {
           ctx.translate(-toffxr, -toffyr);
@@ -756,7 +870,7 @@
         // Constant Functions
         if (countOccurrences(functext, 'x') == 0) functext = '(' + functext + ')x^0';
         // Finalise the function
-        let func = math.evaluate(functext, scope);
+        let func = math.evaluate(1 + '(' + functext + ')', scope);
         if (solveComplex == false || solveComplex == undefined) {
           return round(func.re, Number($('#trace-round').value));
         }
@@ -776,7 +890,7 @@
         ctx.strokeStyle = $('#function-colour').value;
         ctx.lineWidth = 1;
         //ctx.translate(180, 180);
-        for (var i = -180; i < 180; i += 5/10) {
+        for (var i = -36; i < 36; i += 5/10) {
           // The linear graph
           var xrt = i;
           var yrt = -solve(xrt, Number($('#xiv-input').value), false);
@@ -789,14 +903,16 @@
           // Division by zero in rational functions
           if (yrtNext == -Infinity) yrtNext = -360;
           if (yrt == Infinity) yrt = 360;
+          if (yrtNext == Infinity) yrtNext = 360;
+          if (yrt == -Infinity) yrt = -360;
           ctx.beginPath();
-          ctx.moveTo(xrt, yrt);
-          ctx.lineTo(xrtNext, yrtNext);
+          ctx.moveTo(scale * xrt, scale * yrt);
+          ctx.lineTo(scale * xrtNext, scale * yrtNext);
           ctx.stroke();
           // The pointed graph
           if (i % Number($('#graph-major-step').value) == 0 && $('#graph-points').checked == true) {
             ctx.beginPath();
-            ctx.arc(xrt, yrt, 1.25, 0, 2 * Math.PI);
+            ctx.arc(scale * xrt, scale * yrt, 1.25, 0, 2 * Math.PI);
             ctx.fillStyle = $('#function-colour').value;
             ctx.fill();
             ctx.lineWidth = 0;
@@ -852,9 +968,9 @@
                 { value: "2²", replacementValue: "²", onclick: function() { document.calculator.ans.value+="** 2";document.calculator.ansTwo.value+='²'; } },
                 { value: "3³", replacementValue: "³", onclick: function() { document.calculator.ans.value+="** 3";document.calculator.ansTwo.value+='³'; } },
                 { value: "4ⁿʳᵗ", replacementValue: "ⁿ√", onclick: function() { document.calculator.ans.value+="nrt(";document.calculator.ansTwo.value+='nrt('; } },
-                { value: "5ˢʳᵗ", replacementValue: "√", onclick: function() { document.calculator.ans.value+="sqrt($";document.calculator.ansTwo.value+='√('; } },
-                { value: "6ᶜᵇʳᵗ", replacementValue: "∛", onclick: function() { appendText('cbrt($'); } },
-                { value: "8", replacementValue: "!", onclick: function() { appendText('factorial('); } },
+                { value: "5ˢʳᵗ", replacementValue: "√", onclick: function() { document.calculator.ans.value+="sqrt(";document.calculator.ansTwo.value+='√('; } },
+                { value: "6ᶜᵇʳᵗ", replacementValue: "∛", onclick: function() { appendText('cbrt('); } },
+                { value: "8", replacementValue: "!", onclick: function() { appendText('!'); } },
                 { value: "9", replacementValue: "log₂", onclick: function() { appendText('log2('); } },
                 { value: "(-)", replacementValue: "%", onclick: function() { appendText('%'); } },
                 { value: "0", replacementValue: "log₁₀", onclick: function() { appendText('log10('); } },
@@ -942,7 +1058,7 @@
           var ansTwoField = document.calculator.ansTwo;
           
           ansField.value = eval(ansField.value);
-          ansTwoField.value = eval(ansTwoField.value);
+          ansTwoField.value = math.evaluate(ansTwoField.value);
       }
 
       function appendText(text) {
