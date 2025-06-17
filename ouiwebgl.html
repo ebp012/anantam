@@ -1,0 +1,858 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Anantam</title>
+    <link href='style.css' rel='stylesheet' type='text/css'/>
+    <style>
+      .shown {display: block};
+      #bgcontainer {
+        background: url(http://anantam.aeonic.me/bg.png);
+      }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link href='http://aryabhata.aeonic.me/noedit.sigma.css' rel='stylesheet' type='text/css'/>
+    <link
+      rel='stylesheet'
+      href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+    />
+  </head>
+  <body>
+    <div id='bgcontainer' style='background: url(http://anantam.aeonic.me/bg.png); background-size: cover; background-position: center; height: 100vh; filter: sepia(87%);'></div>
+    <div class='container'>
+      <div id='graphing' class='content-section active'>
+        <h1 class="page-title">Graphing</h1>
+        <div class="desk-paper" style='line-height: 36pt;'>
+          <table class='non'>
+            <thead>
+              <tr>
+                <td class='viewport-input'><strong>x-i viewport</strong></td>
+                <td><strong>x-r trace</strong></td>
+                <td><strong>x-i trace</strong></td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td id='xiv-td' class='viewport-input'>
+                  x-iv: <input type='range' min='-36' max='36' value='0' step='1' id='xiv-input'/><br/>
+                  x-iv = <span id='xiv-value'>0</span><br/>
+                  x-iv Min: <input type='number' value='-36' id='xiv-min-input'/><br/>
+                  x-iv Max: <input type='number' value='36' id='xiv-max-input'/><br/>
+                  x-iv Step: <input type='number' value='1' min='0' id='xiv-step-input'/><br/>
+                  <input type='checkbox' id='xiv-type-input' checked='checked'/> <label for='xiv-type-input'>Slider input?</label>
+                </td>
+                <td id='xr-td'>
+                  x-r: <input type='range' min='-36' max='36' value='0' step='1' id='xr-input'/><br/>
+                  x-r = <span id='xr-value'>0</span><br/>
+                  x-r Min: <input type='number' value='-36' id='xr-min-input'/><br/>
+                  x-r Max: <input type='number' value='36' id='xr-max-input'/><br/>
+                  x-r Step: <input type='number' value='1' min='0' id='xr-step-input'/><br/>
+                  <input type='checkbox' id='xr-type-input' checked='checked'/> <label for='xr-type-input'>Slider input?</label>
+                </td>
+                <td id='xi-td'>
+                  x-i: <input type='range' min='-36' max='36' value='0' step='1' id='xi-input'/><br/>
+                  x-i = <span id='xi-value'>0</span><br/>
+                  x-i Min: <input type='number' value='-36' id='xi-min-input'/><br/>
+                  x-i Max: <input type='number' value='36' id='xi-max-input'/><br/>
+                  x-i Step: <input type='number' value='1' min='0' id='xi-step-input'/><br/>
+                  <input type='checkbox' id='xi-type-input' checked='checked'/> <label for='xi-type-input'>Slider input?</label>
+                </td>
+              </tr>
+              <tr class='merged'>
+                <td class='viewport-input'>
+                  <center>
+                    <strong>Function</strong><br/>
+                    <p id='func1'>
+                      f(x) = <input id='function-input' type='text' style='font-family: times;' value='0.37x^2 - 10x'/>
+                      <select id='function-colour'>
+                        <option>pink</option>
+                        <option value='red'>medium red</option>
+                        <option value='#880808'>dark red</option>
+                        <option value='#FFD580'>light orange</option>
+                        <option value='orange'>medium orange</option>
+                        <option>brown</option>
+                        <option value='#FFFDD0'>cream</option>
+                        <option>yellow</option>
+                        <option>gold</option>
+                        <option value='#90EE90'>light green</option>
+                        <option value='green'>medium green</option>
+                        <option value='#228B22'>dark green</option>
+                        <option value='#90E4C1'>light teal</option>
+                        <option value='teal'>medium teal</option>
+                        <option value='#008080'>dark teal</option>
+                        <option value='powderblue'>light blue</option>
+                        <option value='blue'>medium blue</option>
+                        <option value='navy'>navy blue</option>
+                        <option>indigo</option>
+                        <option selected='selected'>purple</option>
+                        <option>maroon</option>
+                        <option>magenta</option>
+                        <option>brown</option>
+                        <option>white</option>
+                        <option>silver</option>
+                        <option>grey</option>
+                        <option value='darkslategrey'>slate</option>
+                        <option>black</option>
+                        <option value='rgba(0,0,0,0)'>invisible</option>
+                      </select>
+                    </p>
+
+                  </center>
+                </td>
+                <td>
+                  <center>
+                    <strong>Trace</strong><br/>
+                    x: <span id='xri-showcase'>? + ?i</span><br/>
+                    y: <span id='yri-showcase'>? + ?i</span><br/>
+                    <hr/>
+                    Round: 10<sup><input id='trace-round' type='number' style='font-size: calc(inherit * 0.25);' value='-3'/></sup>
+                  </center>
+                </td>
+                <td>
+                  <center>
+                    Minor step: <input id='graph-minor-step' type='number' min='0' step='0.5' value='1' title='distance between thinner gridlines. set to 0 to disable them entirely.'/><br/>
+                    Major step: <input id='graph-major-step' type='number' min='0' value='6' title='distance between thicker gridlines. set to 0 to disable them entirely.'/><br/>
+                    xr-offset: <input id='graph-offset-xr' type='number' step='1' value='0'/><br/>
+                    yr-offset: <input id='graph-offset-yr' type='number' step='1' value='0'/><br/>
+                    yi-offset: <input id='graph-offset-yi' type='number' step='1' value='0'/><br/>
+                    Tick height: <input id='graph-tick-height' type='number' step='0.5' value='2.5'/><br/>
+                    <button id='graph-btn' onclick='graphFunction();'>Graph</button><br/><hr/>
+                    <form>
+                      X-axis<br/>
+                      <input type='radio' name='graph-dimension-x' id='graph-dimension-xr' checked='checked'/><label for='graph-dimension-xr'>Real only</label><br/>
+                      <input type='radio' name='graph-dimension-x' id='graph-dimension-xi'/><label for='graph-dimension-xi'>Imaginary only</label><br/>
+                    </form><br/>
+                    <form>
+                      Y-axis<br/>
+                      <input type='radio' name='graph-dimension-y' id='graph-dimension-yr' checked='checked'/><label for='graph-dimension-yr'>Real only</label><br/>
+                      <input type='radio' name='graph-dimension-y' id='graph-dimension-yi'/><label for='graph-dimension-yi'>Imaginary only</label><br/>
+                    </form><br/><hr/>
+                    <input id='graph-ticks' type='checkbox' checked='checked'/> <label for='graph-ticks'>Tick marks?</label><br/>
+                    <input id='graph-grids' type='checkbox' checked='checked'/> <label for='graph-grids'>Grid lines?</label><br/>
+                    <input id='graph-points' type='checkbox' checked='checked'/> <label for='graph-points'>Graph points?</label><br/>
+                    <input id='graph-dimension-3d' type='checkbox'/> <label for='graph-dimension-3d'>Enable 3D?</label><br/>
+                    <input id='graph-auto' type='checkbox' checked='checked'/> <label for='graph-auto' title='resource-consuming'>Graph automatically?</label><br/>
+                  </center>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <center>
+            <div id='graph-div'>
+              <div id='threejs-container' style='width: 360px; height: 360px;'></div>
+            </div>
+          </center>
+        </div>
+      </div>
+      <div id='scientific' class='content-section'>
+        <h1 class="page-title">Scientific</h1>
+        <div class="desk-paper" style='line-height: 36pt;'>
+          <form name="calculator" >
+            <input type="textfield" id="resultFake" name="ansTwo" placeholder="0." style="width: 100%; font-family: display, futura, georgia; margin: 5px; padding: 10px; color: red; background: black; outline: 0;" readonly='readonly' oncontextmenu='return false;eToggle("ans", "block", "ansTwo", "none");'><br>
+              <input type="textfield" id='result' name="ans" value="" style='width: 100%; display: none;' oncontextmenu='return false; eToggle("ansTwo", "block", "result", "none");'>
+              <table class='non'>
+                <thead>
+                  <tr>
+                    <td><input type="button" value="=" onClick="document.calculator.ans.value=eval(document.calculator.ans.value);document.calculator.ansTwo.value=eval(document.calculator.ans.value)" title='Show solution: Equals Sign' class='calb caln'/></td>
+                    <td><input type="button" value="HYPR" onclick="toggleHyperMode();" title='Toggle Hyper mode' class='calb cala'/></td>
+                    <td><input type="reset" value="AC" title='All Clear' class='calb caln'/></td>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class='numrow'>
+                    <td><input type='button' value='1ⁱ' onClick="document.calculator.ans.value+='1';document.calculator.ansTwo.value+='1';" class='calb caln'/></td>
+                    <td><input type='button' value='2²' onClick="document.calculator.ans.value+='2';document.calculator.ansTwo.value+='2';" class='calb caln'/></td>
+                    <td><input type="button" value="3³" onClick="document.calculator.ans.value+='3';document.calculator.ansTwo.value+='3';" class='calb caln'/></td>
+                    <td><input type="button" value="+" onClick="document.calculator.ans.value+='+';document.calculator.ansTwo.value+='+';" class='calb calo'/></td>
+                    <td><input type="button" value="aⁿ" onClick="document.calculator.ans.value+='**';document.calculator.ansTwo.value+='^';" class='calb calo'/></td>
+                  </tr>
+                  <tr class='numrow'>
+                    <td><input type="button" value="4ⁿʳᵗ" onClick="document.calculator.ans.value+='4';document.calculator.ansTwo.value+='4';" class='calb caln'/></td>
+                    <td><input type="button" value="5ˢʳᵗ" onClick="document.calculator.ans.value+='5';document.calculator.ansTwo.value+='5';" class='calb caln'/></td>
+                    <td><input type="button" value="6ᶜᵇʳᵗ" onClick="document.calculator.ans.value+='6';document.calculator.ansTwo.value+='6';" class='calb caln'/></td>
+                    <td><input type="button" value="-" onClick="document.calculator.ans.value+='-';document.calculator.ansTwo.value+='-';" class='calb calo'/></td>
+                    <td><input type="button" value="ⁿa" onClick="document.calculator.ans.value+='tet(';document.calculator.ansTwo.value+='tet(';" class="calo" title="Tetration"/></td>
+                  </tr>
+                  <tr class='numrow'>
+                    <td><input type="button" value="7" onClick="document.calculator.ans.value+='7';document.calculator.ansTwo.value+='7';" class='calb caln'/></td>
+                    <td><input type="button" value="8" onClick="document.calculator.ans.value+='8';document.calculator.ansTwo.value+='8';" class='calb caln'/></td>
+                    <td><input type="button" value="9" onClick="document.calculator.ans.value+='9';document.calculator.ansTwo.value+='9';" class='calb caln'/></td>
+                    <td><input type="button" value="&times;" onClick="document.calculator.ans.value+='*';document.calculator.ansTwo.value+='&bull;';" class='calb calo'/></td>
+                  </tr>
+                  <tr class='numrow'>
+                    <td><input type='button' value='.' onClick="document.calculator.ans.value+='.';document.calculator.ansTwo.value+='.';" title='Decimal' class='calb cala'/></td>
+                    <td><input type="button" value="0" onClick="document.calculator.ans.value+='0';document.calculator.ansTwo.value+='0';" title='Zero' class='calb caln'/></td>
+                    <td><input type='button' value=',' onClick="document.calculator.ans.value+=',';document.calculator.ansTwo.value+=',';" title='Comma' class='calb cala'/></td>
+                    <td><input type="button" value="÷" onClick="document.calculator.ans.value+='/';document.calculator.ansTwo.value+='÷';" class='calb calo'/></td>
+                    <td><input type="button" value="R" onClick="document.calculator.ans.value+='%';document.calculator.ansTwo.value+='R';" class='calb calo'/></td>
+                  </tr>
+                  <tr class='numrow'>
+                    <td><input type='button' value='(' onClick="document.calculator.ans.value+='(';document.calculator.ansTwo.value+='(';" title='Opening Parentheses' class='calb cala'/></td>
+                    <td><input type='button' value=')' onClick="document.calculator.ans.value+=')';document.calculator.ansTwo.value+=')';" title='Closing Parentheses' class='calb cala'/></td>
+                  </tr>
+                  <tr class="numrow">
+                    <td><input type="button" value="x" onClick="document.calculator.ans.value+='x';document.calculator.ansTwo.value+='x';" class='calb calv' disabled='disabled'/></td>
+                    <td><input type="button" value="y" onClick="document.calculator.ans.value+='y';document.calculator.ansTwo.value+='y';" class='calb calv' disabled='disabled'/></td>
+                    <td><input type='button' value='&pi;' onclick='document.calculator.ans.value+="3.14159265358979323846264";document.calculator.ansTwo.value+="&pi;";'  class='calb cala'/></td>
+                    <td><input type="button" value="e" onclick="document.calculator.ans.value+='2.71828182845904523536028';document.calculator.ansTwo.value+='e';" class='calb cala'/></td>
+                  </tr>
+                </tbody>
+              </table>
+            </form>
+        </div>
+      </div>
+    </div>
+
+
+    <nav class='nav-bar'>
+      <div class='nav-item' data-target='#graphing' id='homeTab'>
+        <i class='fa-solid fa-pencil'></i>
+        Graphing
+      </div>
+      <div class='nav-item' data-target='#scientific'>
+        <i class='fa-solid fa-calculator'></i>
+        Scientific
+      </div>
+      <div class='nav-item' data-target='#algebra'>
+        <i class='fa-solid fa-microchip'></i>
+        Algebra
+      </div>
+      <div class='nav-item' data-target='#units'>
+        <i class='fa-solid fa-ruler'></i>
+        Units
+      </div>
+      <div class='nav-item' data-target='#chemistry'>
+        <i class='fa-solid fa-flask'></i>
+        Chemistry
+      </div>
+      <div class='nav-item' data-target='#more'>
+        <i class='fa-solid fa-motorcycle'></i>
+        More
+      </div>
+    </nav>
+
+
+    <script>
+// Axes and Trace Variables
+      var xr = 0, xrp = 0; // x real (x axis)
+      var xi = 0, xip = 0; // x imaginary (z axis)
+      var yr = 0, yrp = 0; // y real (y axis)
+      var yi = 0, yip = 0; // y imaginary (t axis)
+      var pregraphed = false; // Added missing declaration
+
+      var xiv = 0, xivp = 0; // x imaginary viewport
+      var inputs = ['xi', 'xr', 'xiv']; // each instance of the slider setup thing
+
+      var xrmin = -36, xrmax = 36; // x-real minimum/maximum
+      var ximin = -36, ximax = 36; // x-imaginary minimum/maximum
+
+      // Convenience stuff
+      const $ = (selector) => document.querySelector(selector);
+
+      // THREE.js Declaration
+      const container = document.getElementById('threejs-container');
+      var canvasWidth = 360;
+      var canvasHeight = 360;
+      var scalex = 5;
+      var scaley = 5;
+      var do3D = false;
+      var toffxr = 0; // total xr-offset
+      var toffyr = 0; // total yr-offset
+      var toffyi = 0; // total yi-offset
+
+      // THREE.js setup
+      const scene = new THREE.Scene();
+      const camera = new THREE.OrthographicCamera(
+        canvasWidth / -2,  // left
+        canvasWidth / 2,   // right
+        canvasHeight / 2,  // top
+        canvasHeight / -2, // bottom
+        1,                 // near
+        1000               // far
+      );
+
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setSize(canvasWidth, canvasHeight);
+      container.appendChild(renderer.domElement);
+
+      // Grid and axes setup
+      const gridHelper = new THREE.GridHelper(100, 10, 0x888888, 0x444444);
+      scene.add(gridHelper);
+      
+      const axesHelper = new THREE.AxesHelper(50);
+      scene.add(axesHelper);
+
+      // Graph line setup
+      let graphLine = null;
+      let graphPoints = null;
+
+      camera.position.set(0, 0, 25);
+      camera.lookAt(0, 0, 0);
+
+      function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      window.addEventListener('load', function() {
+        document.querySelector('#homeTab').click();
+        setInterval(function() {
+          // Update whether graph is 2D or 3D
+          if ($('#graph-dimension-3d').checked == true) {
+            do3D = true;
+          }
+          else {
+            do3D = false;
+          }
+          // Continuously (every 37 ms) check for changes in xr,xi,yr,yi and push to span
+          var textx = '', texty = '';
+          // Mirror the value of x
+          if (xr != 0) {
+            textx += xr.toString();
+          }
+          if (xi != 0) {
+            textx += ' ';
+            if (xi < 0) {
+              textx += '- ' + ((-1) * xi).toString() + '<i>i</i>';
+            }
+            else if (xi > 0) {
+              if (xr != 0) textx += '+ '
+              textx += xi.toString() + '<i>i</i>';
+            }
+            else {
+              //textx += ' ± ?i'
+            }
+          }
+          if (xr == 0 && xi == 0) textx = '0'
+
+          // Solve for y and then store it
+          yr = solve(xr, xi, false);
+          yi = solve(xr, xi, true);
+
+          // Display the value of y
+          if (yr != 0) {
+            texty += yr.toString();
+          }
+          if (yr != 0) {
+            texty += ' ';
+            if (yi < 0) {
+              texty += '- ' + ((-1) * yi).toString() + '<i>i</i>';
+            }
+            else if (yi > 0) {
+              if (yr != 0) texty += '+ '
+              texty += yi.toString() + '<i>i</i>';
+            }
+            else {
+              //texty += ' ± ?i'
+            }
+          }
+          if (yr == 0 && yi == 0) texty = '0'
+          
+          $('#xri-showcase').innerHTML = textx;
+          $('#yri-showcase').innerHTML = texty;
+
+          // if the user selects to graph automatically (resource-consuming)
+          if ($('#graph-auto').checked == true) {
+            graphFunction();
+          }
+        }, 37);
+
+        $('#graphing').addEventListener('mouseover', function () {
+          if (pregraphed == false) pregraphed = true;
+          graphFunction();
+        });
+
+        $('#xi-input').addEventListener('input', function () {
+          xi = Number(this.value);
+          $('#xi-value').innerHTML = xi
+          
+        });
+
+        $('#xr-input').addEventListener('input', function () {
+          xr = Number(this.value);
+          $('#xr-value').innerHTML = xr;
+        });
+
+        $('#xiv-input').addEventListener('input', function () {
+          xiv = Number(this.value);
+          $('#xiv-value').innerHTML = xiv;
+        });
+
+        $('#graph-minor-step').addEventListener('input', function () {
+          $('#graph-major-step').step = this.value;
+        });
+
+        $('#graph-offset-xr').addEventListener('input', function () {
+          toffxr = Number(this.value);
+          graphFunction();
+        });
+
+        $('#graph-offset-yr').addEventListener('input', function () {
+          toffyr = Number(this.value);
+          graphFunction();
+        });
+
+        $('#function-input').addEventListener('input', function () {
+          //func = eval($('#function-input').value);
+        });
+
+        function resetOffset () {
+          // Not needed in THREE.js as we handle offsets differently
+        }
+
+        function inputSetup (prefix) {
+          // Change xi minimum
+          $('#' + prefix + '-min-input').addEventListener('input', function () {
+            $('#' + prefix + '-input').min = Number($('#' + prefix + '-min-input').value);
+            $('#' + prefix + '-max-input').min = $('#' + prefix + '-input').min;
+          });
+
+          // Change xi maximum
+          $('#' + prefix + '-max-input').addEventListener('input', function () {
+            $('#' + prefix + '-input').max = Number($('#' + prefix + '-max-input').value);
+            $('#' + prefix + '-min-input').max = $('#' + prefix + '-input').max;
+          });
+
+          // Change xi step
+          $('#' + prefix + '-step-input').addEventListener('input', function () {
+            $('#' + prefix + '-input').step = Number($('#' + prefix + '-step-input').value);
+          });
+
+          // Change xi input type
+          $('#' + prefix + '-type-input').addEventListener('input', function () {
+            if ($('#' + prefix + '-type-input').checked != true && $('#' + prefix + '-type-input').checked != 'checked') {
+              $('#' + prefix + '-input').type = 'number';
+              $('#' + prefix + '-input').removeAttribute('min');
+              $('#' + prefix + '-input').removeAttribute('max');
+              $('#' + prefix + '-min-input').disabled = 'disabled';
+              $('#' + prefix + '-max-input').disabled = 'disabled';
+            }
+            else {
+              $('#' + prefix + '-input').type = 'range';
+              $('#' + prefix + '-min-input').removeAttribute('disabled');
+              $('#' + prefix + '-max-input').removeAttribute('disabled');
+              if (Number($('#' + prefix + '-input').value) > Number($('#' + prefix + '-max-input').value)) {
+                $('#' + prefix + '-max-input').value = $('#' + prefix + '-input').value;
+              }
+              if (Number($('#' + prefix + '-input').value) < Number($('#' + prefix + '-min-input').value)) {
+                $('#' + prefix + '-min-input').value = $('#' + prefix + '-input').value;
+              }
+              
+              $('#' + prefix + '-input').max = Number($('#' + prefix + '-max-input').value);
+              $('#' + prefix + '-input').min = Number($('#' + prefix + '-min-input').value);
+            }
+          });
+        }
+        for (var i = 0; i < inputs.length; i++) {
+          inputSetup(inputs[i]);
+        }
+      });
+
+      // Round numbers
+      function round (num, pwr) {
+        if (num == undefined) {
+          return 0;
+        }
+        var p = pwr;
+        if (p == undefined) {
+          p = 0;
+        }
+        else {
+          return Math.round(num * 10 ** -p) / 10 ** -p;
+        }
+      }
+      // Solve the function for some X
+      function solve2D (x) {
+        // solve y = x^2/9 + x - 1
+        let func2D = (0.037) * x ** 2 + x - 10; //eval($('#function-input').value);
+        return round(func2D, Number($('#trace-round').value));
+      }
+      function countOccurrences(str, search) {
+        return str.split(search).length - 1;
+      }
+      function solve (x, i, solveComplex, whence) {
+        if (whence == undefined) whence = 1;
+        // Read the function input
+        let scope = { x: math.complex(x, i) };
+        var functext = $('#function-input').value.toString();
+        // Constant Functions
+        if (countOccurrences(functext, 'x') == 0) functext = '(' + functext + ')x^0';
+        // Finalise the function
+        let func = math.evaluate(functext, scope);
+        if (solveComplex == false || solveComplex == undefined) {
+          return round(func.re, Number($('#trace-round').value));
+        }
+        else {
+          var a = round(func.im, Number($('#trace-round').value));
+          return round(func.im, Number($('#trace-round').value));
+        }
+      }
+
+      function graphFunction () {
+        // Clear previous graph
+        if (graphLine) scene.remove(graphLine);
+        if (graphPoints) scene.remove(graphPoints);
+        
+        // Create new points array
+        const points = [];
+        
+        // Generate points for the graph
+        for (var i = -36; i < 36; i += 0.1) {
+          const x = i;
+          let yValue;
+          
+          if ($('#graph-dimension-xi').checked == true) {
+            yValue = solve(Number($('#xiv-input').value), x, false);
+          } else {
+            yValue = solve(x, Number($('#xiv-input').value), false);
+          }
+          
+          // Skip non-finite values
+          if (!isFinite(yValue)) continue;
+          
+          points.push(new THREE.Vector3(0, x, yValue));
+        }
+        
+        // Create new geometry with the points
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        
+        // Get color from the select element
+        const color = $('#function-colour').value || 'purple';
+        const material = new THREE.LineBasicMaterial({ 
+          color: color,
+          linewidth: 2
+        });
+        
+        // Create new line and add to scene
+        graphLine = new THREE.Line(geometry, material);
+        scene.add(graphLine);
+        
+        // Add points if selected
+        if ($('#graph-points').checked == true) {
+          const pointGeometry = new THREE.BufferGeometry();
+          const pointMaterial = new THREE.PointsMaterial({ 
+            color: color, 
+            size: 0.2 
+          });
+          
+          const significantPoints = [];
+          for (let i = 0; i < points.length; i += 10) {
+            significantPoints.push(points[i]);
+          }
+          
+          pointGeometry.setFromPoints(significantPoints);
+          graphPoints = new THREE.Points(pointGeometry, pointMaterial);
+          scene.add(graphPoints);
+        }
+      }
+
+      // Rest of your existing code remains unchanged...
+      // Navbar function
+      $(document).ready(function () {
+        // SettingsManager might be missing - comment out if not defined
+        // SettingsManager.init();
+
+        // Existing navigation code
+        $('.nav-item').click(function () {
+          const target = $(this).data('target');
+          $('.content-section').removeClass('active');
+          $(target).addClass('active');
+          $('.nav-item').css({
+            transform: 'translateY(0)',
+            background: 'transparent',
+          });
+          $(this)
+            .css('background', 'rgba(255,255,255,0.3)')
+            .css('transform', 'translateY(-5px)');
+        });
+      });
+
+      // Scientific Calculator functions remain unchanged...
+      function tet(x,y) {
+        if (y == 2) {
+          return x ** y;
+        }
+        else if (y == 1) {return x;}
+        else {
+          var r = BigInt(x); // r = result of exponentiation
+          for (var i=0n; i <= BigInt(y-2); i++) {
+            r = BigInt(x ** r);
+          }
+          if (y == 0) {return 1;}
+          return r;
+        }
+      }
+      function nrt(exp, num) {
+        Math.pow(exp, 1/num);
+      }
+      function factorial (a) {
+        var i = 1;
+        while (i <= a) {
+          r = BigInt(r * i); // Multiply result by the current iteration i
+          i = BigInt(i + 1);           // Increment the iteration counter
+        }
+        return r;
+      }
+      var hyperMode = false; // Initially not in hyper mode
+      function toggleHyperMode () {
+        hyperMode = !hyperMode;
+        toggleHyperMode1();
+        toggleHyperMode2();
+      }
+      function toggleHyperMode1() {
+          var hyperButton = document.querySelector('.calb[value="HYPR"]');
+          if (hyperMode == true) {
+            console.log('Hypermode is active')
+            // Toggle the functionality of the buttons based on hyper mode
+            var buttonsToUpdate = [
+                { value: '^^', replacementValue: 'ln', onclick: function() { appendText('ln('); } },
+                { value: '^', replacementValue: 'n√', onclick: function() { appendText('nthRoot('); } },
+                { value: '1ⁱ', replacementValue: 'i', onclick: function() { document.calculator.ans.value+='sqrt(-1)';document.calculator.ansTwo.value+='i'; } },
+                { value: '2²', replacementValue: '²', onclick: function() { document.calculator.ans.value+='** 2';document.calculator.ansTwo.value+='²'; } },
+                { value: '3³', replacementValue: '³', onclick: function() { document.calculator.ans.value+='** 3';document.calculator.ansTwo.value+='³'; } },
+                { value: '4ⁿʳᵗ', replacementValue: 'ⁿ√', onclick: function() { document.calculator.ans.value+='nrt(';document.calculator.ansTwo.value+='nrt('; } },
+                { value: '5ˢʳᵗ', replacementValue: '√', onclick: function() { document.calculator.ans.value+='sqrt($';document.calculator.ansTwo.value+='√('; } },
+                { value: '6ᶜᵇʳᵗ', replacementValue: '∛', onclick: function() { appendText('cbrt($'); } },
+                { value: '8', replacementValue: '!', onclick: function() { appendText('factorial('); } },
+                { value: '9', replacementValue: 'log₂', onclick: function() { appendText('log2('); } },
+                { value: '(-)', replacementValue: '%', onclick: function() { appendText('%'); } },
+                { value: '0', replacementValue: 'log₁₀', onclick: function() { appendText('log10('); } },
+            ];
+        
+            buttonsToUpdate.forEach(button => {
+                var buttonElement = document.querySelector(`input[type='button'][value='${button.value}'].calb`);
+                if (buttonElement) {
+                    if (hyperMode) {
+                        buttonElement.value = button.replacementValue;
+                        buttonElement.onclick = button.onclick;
+                    } else {
+                        buttonElement.value = button.value;
+                        buttonElement.onclick = function() { appendText(button.value); };
+                    }
+                }
+            });
+          }
+          else {
+            // Revert the buttons to their original values and functionalities
+            var buttonsToRevert = [
+              { value: 'i', originalValue: '1ⁱ', onclick: function() { appendText('1'); } },
+              { value: '²', originalValue: '2²', onclick: function() { appendText('2'); } },
+              { value: '³', originalValue: '3³', onclick: function() { appendText('3'); } },
+              { value: 'ⁿ√', originalValue: '4ⁿʳᵗ', onclick: function() { appendText('4'); } },
+              { value: '√', originalValue: '5ˢʳᵗ', onclick: function() { appendText('5'); } },
+              { value: '∛', originalValue: '6ᶜᵇʳᵗ', onclick: function() { appendText('6'); } },
+              { value: '!', originalValue: '8', onclick: function() { appendText('8'); } },
+              { value: 'log₂', originalValue: '9', onclick: function() { appendText('9'); } },
+              { value: 'log₁₀', originalValue: '0', onclick: function() { appendText('0'); } },
+            ];
+        
+            buttonsToRevert.forEach(button => {
+                var buttonElement = document.querySelector(`input[type='button'][value='${button.value}'].calb`);
+                if (buttonElement) {
+                    buttonElement.value = button.originalValue;
+                    buttonElement.onclick = button.onclick;
+                }
+            });
+          }
+        console.log('Task completed successfully');
+      }
+      function toggleHyperMode2() {
+          var hyperButton = document.querySelector('.calo[value="HYPR"]'); // Fixed syntax
+          if (hyperMode == true) {
+            console.log('Hypermode is active')
+            // Toggle the functionality of the buttons based on hyper mode
+            var buttonsToUpdate = [
+                { value: '^^', replacementValue: 'ln', onclick: function() { appendText('ln('); } },
+                { value: '^', replacementValue: 'n√', onclick: function() { appendText('nthRoot('); } },
+            ];
+        
+            buttonsToUpdate.forEach(button => {
+                var buttonElement = document.querySelector(`input[type='button'][value='${button.value}'].calb`);
+                if (buttonElement) {
+                    if (hyperMode) {
+                        buttonElement.value = button.replacementValue;
+                        buttonElement.onclick = button.onclick;
+                    } else {
+                        buttonElement.value = button.value;
+                        buttonElement.onclick = function() { appendText(button.value); };
+                    }
+                }
+            });
+          }
+          else {
+            // Revert the buttons to their original values and functionalities
+            var buttonsToRevert = [
+              { value: '^^', originalValue: 'ln', onclick: function() { appendText('^^'); } },
+              { value: '^', originalValue: 'n√', onclick: function() { appendText('**'); } },
+            ];
+        
+            buttonsToRevert.forEach(button => {
+                var buttonElement = document.querySelector(`input[type='button'][value='${button.value}'].calo`);
+                if (buttonElement) {
+                    buttonElement.value = button.originalValue;
+                    buttonElement.onclick = button.onclick;
+                }
+            });
+          }
+        console.log('Task completed successfully');
+      }
+      function evaluateExpression() {
+          var ansField = document.calculator.ans;
+          var ansTwoField = document.calculator.ansTwo;
+          
+          ansField.value = eval(ansField.value);
+          ansTwoField.value = eval(ansTwoField.value);
+      }
+
+      function appendText(text) {
+          var ansField = document.calculator.ans;
+          var ansTwoField = document.calculator.ansTwo;
+          
+          ansField.value += text;
+          ansTwoField.value += text;
+      }
+
+      
+      var fakeResult = document.getElementById('resultFake');
+      document.addEventListener('keydown', function (event) {
+        if (event.key === 'Shift') {
+          toggleHyperMode();
+        }
+      });
+
+      document.addEventListener('keyup', function (event) {
+        if (event.key === 'Shift') {
+          toggleHyperMode();
+        }
+      });
+</script>
+    <style>input[type=number]{max-width:100px;}</style>
+    
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.2/math.js'></script>
+    <style>
+      @font-face {
+        font-family: 'display';
+        src: url('display.ttf') format('truetype');
+      }
+      /* The browser window */
+      #scientific .calcinterface {
+        border: 3px solid #f1f1f1;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+      }
+      
+      /* Container for columns and the top "toolbar" */
+      #scientific .row {
+        padding: 10px;
+        background: navy;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
+      }
+      
+      /* Create three unequal columns that floats next to each other */
+      #scientific .column {
+        float: left;
+      }
+      
+      #scientific .left {
+        width: 15%;
+      }
+      
+      #scientific .right {
+        width: 10%;
+      }
+      
+      #scientific .middle {
+        width: 75%;
+      }
+      
+      /* Clear floats after the columns */
+      #scientific .row:after {
+        content: "";
+        display: table;
+        clear: both;
+      }
+      
+      /* Three dots */
+      #scientific .dot {
+        margin-top: 4px;
+        height: 12px;
+        width: 12px;
+        background-color: #bbb;
+        border-radius: 50%;
+        display: inline-block;
+        border: 1px solid white;
+      }
+      
+      /* Style the input field */
+      #scientific input[type=text] {
+        width: 100%;
+        border-radius: 3px;
+        border: none;
+        background-color: white;
+        margin-top: -8px;
+        height: 25px;
+        color: #666;
+        padding: 5px;
+      }
+      
+      /* Three bars (hamburger menu) */
+      #scientific .bar {
+        width: 17px;
+        height: 3px;
+        background-color: #aaa;
+        margin: 3px 0;
+        display: block;
+      }
+      
+      /* Page content */
+      #scientific .clontent {
+        padding: 10px;
+      }
+      #scientific .calb {
+        border: 3.5px solid black;
+        margin-right: 0px;
+      }
+      #scientific .caln {
+        background-color: gold;
+      }
+      #scientific .cala {
+        background-color: silver;
+        border: 3.5px solid black;
+        margin-right: 0px;
+      }
+      #scientific .calo {
+        background-color: #967444;
+        border: 3.5px solid black;
+        margin-right: 0px;
+      }
+      .cala, .calb, .calo {width:20%;height:20%;height:120px;font-size:80px}
+      #scientific #result, #scientific #resultFake {
+        border: 4px solid green;
+        background-color: #967444;
+        color: green;
+        height: 54px;
+        font-weight: bold;
+        font-size: 42px;
+        overflow: auto;
+      }
+      #scientific .calv {
+        background-color: #FF9900; /* Customize the color as needed */
+        border: 3.5px solid black;
+        margin-right: 0px;
+      }
+      #scientific div#calculator {
+        width: 100%;
+        background-color: black;
+      }
+      /*#scientific .numrow {display: flex; width: 100%;}*/
+      #scientific form table {width: 100%;}
+      #scientific table td {width: 20%;}
+      #scientific table td input[type] {width: 100%; font-family: futura; font-size: 30px;}
+      #scientific #resultFake::placeholder {
+        color: red;
+      }
+    </style>
+  </body>
+</html>
