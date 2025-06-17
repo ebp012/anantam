@@ -554,14 +554,14 @@
           // Vertical scrolling
           if (event.deltaY > 0) {
             // Scroll down; ideally decrease y-i viewport
-            xiv -= $('#xiv-step-input').value;
+            xiv -= Number($('#xiv-step-input').value);
             if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
             $('#xiv-input').value = xiv;
             $('#xiv-value').innerHTML = xiv;
           }
           else if (event.deltaY < 0) {
             // Scroll up; ideally increase y-i viewport
-            xiv += $('#xiv-step-input').value;
+            xiv += Number($('#xiv-step-input').value);
             if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
             $('#xiv-input').value = xiv;
             $('#xiv-value').innerHTML = xiv;
@@ -569,14 +569,14 @@
           // Horizontal scrolling
           if (event.deltaX > 0) {
             // Scroll left; decrease x-i viewport
-            xiv -= $('#xiv-step-input').value;
+            xiv -= Number($('#xiv-step-input').value);
             if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
             $('#xiv-input').value = xiv;
             $('#xiv-value').innerHTML = xiv;
           }
           else if (event.deltaX < 0) {
             // Scroll right; increase x-i viewport
-            xiv += $('#xiv-step-input').value;
+            xiv += Number($('#xiv-step-input').value);
             if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
             $('#xiv-input').value = xiv;
             $('#xiv-value').innerHTML = xiv;
@@ -588,14 +588,14 @@
           // Horizontal scrolling
           if (event.deltaX > 0) {
             // Scroll left
-            xiv -= $('#xiv-step-input').value;
+            xiv -= Number($('#xiv-step-input').value);
             if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
             $('#xiv-input').value = xiv;
             $('#xiv-value').innerHTML = xiv;
           }
           else if (event.deltaX < 0) {
             // Scroll right
-            xiv += $('#xiv-step-input').value;
+            xiv += Number($('#xiv-step-input').value);
             if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
             $('#xiv-input').value = xiv;
             $('#xiv-value').innerHTML = xiv;
@@ -607,15 +607,15 @@
           // Horizontal scrolling
           if (event.deltaX > 0) {
             // Scroll left
-            xr -= $('#xr-step-input').value;
-            if (xr <= $('#xr-min-input').value) xr = Number($('#xr-min-input'));
+            xr -= Number($('#xr-step-input').value);
+            if (xr <= $('#xr-min-input').value) xr = Number($('#xr-min-input').value);
             $('#xr-input').value = xr;
             $('#xr-value').innerHTML = xr;
           }
           else if (event.deltaX < 0) {
             // Scroll right
-            xr += $('#xr-step-input').value;
-            if (xr >= $('#xr-max-input').value) xi = Number($('#xr-max-input'));
+            xr += Number($('#xr-step-input').value);
+            if (xr >= $('#xr-max-input').value) xr = Number($('#xr-max-input').value);
             $('#xr-input').value = xr;
             $('#xr-value').innerHTML = xr;
           }
@@ -626,15 +626,15 @@
           // Horizontal scrolling
           if (event.deltaX > 0) {
             // Scroll left
-            xi -= $('#xi-step-input').value;
-            if (xi <= $('#xi-min-input').value) xi = $('#xi-min-input');
+            xi -= Number($('#xi-step-input').value);
+            if (xi <= $('#xi-min-input').value) xi = Number($('#xi-min-input').value);
             $('#xi-input').value = xi;
             $('#xi-value').innerHTML = xi;
           }
           else if (event.deltaX < 0) {
             // Scroll right
-            xi += $('#xi-step-input').value;
-            if (xi >= $('#xi-max-input').value) xi = $('#xi-max-input');
+            xi += Number($('#xi-step-input').value);
+            if (xi >= $('#xi-max-input').value) xi = Number($('#xi-max-input').value);
             $('#xi-input').value = xi;
             $('#xi-value').innerHTML = xi;
           }
