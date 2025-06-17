@@ -379,6 +379,136 @@
           <br/><br/><br/><br/><br/><br/>
         </div>
       </div>
+
+      <div id='units' class='content-section active'>
+        <h1 class="page-title">Units</h1>
+        <div class="desk-paper" style='line-height: 36pt;'>
+          <h3>General table</h3>
+          <table class='non'>
+            <thead>
+              <tr>
+                <td colspan='3'>
+                  <select>
+                    <optgroup label='Base units'>
+                      <option value='length'>Length</option>
+                      <option value='time'>Time</option>
+                      <option value='weight'>Weight</option>
+                      <option value='mass'>Mass</option>
+                      <option value='current'>Electric current</option>
+                      <option value='substance'>Substance</option>
+                      <option value='luminosity'>Luminous intensity</option>
+                      <option value='currency'>Currency</option>
+                    </optgroup>
+                    <optgroup label='Derived units'>
+                      <option value='solid'>Solid volume</option>
+                      <option value='fluid'>Fluid volume</option>
+                      <option value='area'>Area</option>
+                      <option value='frequency'>Frequency</option>
+                      <option value='speed'>Speed</option>
+                      <option value='angle'>Angle</option>
+                      <option value='angle3d'>3D angle</option>
+                      <option value='angle4d'>4D angle</option>
+                    </optgroup>
+                  </select>
+                </td>
+              <tr>
+                <td>Unit</td>
+                <td></td>
+                <td>Convert</td>
+              </tr>
+            </thead>
+            <tbody id='conv-body'>
+              <tr>
+                <td id='conv-length'>
+                  <select id='conv-length-first'>
+                    <optgroup label='Imperial'>
+                      <option value='thou'><i>Thou (th)</i></option>
+                      <option value='twip'><i>Twip (tw)</i></option>
+                      <option value='point'>Point (pt)</option>
+                      <option value='pica'><i>Pica (pc)</i></option>
+                      <option value='pica'><i>Poppyseed (ps)</i></option>
+                      <option value='pica'><i>Barleycorn (bc)</i></option>
+                      <option value='inch' selected='selected'>Inch (in)</option>
+                      <option value='hand'><i>Hand (h)</i></option>
+                      <option value='foot'>Foot (ft)</option>
+                      <option value='yard'>Yard (yd)</option>
+                      <option value='chain'><i>Chain (ch)</option>
+                      <option value='furlong'>Furlong (fl)</option>
+                      <option value='mile'>Mile (mi)</option>
+                      <option value='league'>League (lg)</option>
+                    </optgroup>
+                    <optgroup label='Metric/SI'>
+                      <option value='qm'>Quectometre (qm)</option>
+                      <option value='rm'>Rontometre (rm)</option>
+                      <option value='ym'>Yoctometre (ym)</option>
+                      <option value='zm'>Zeptometre (zm)</option>
+                      <option value='am'>Attometre (am)</option>
+                      <option value='fm'>Femtometre (fm)</option>
+                      <option value='åm'>Ångstrom (Å)</option>
+                      <option value='pm'>Picometre (pm)</option>
+                      <option value='nm'>Nanometre (nm)</option>
+                      <option value='μm'>Micrometre (μm)</option>
+                      <option value='mam'>Myriametre (mam)</option>
+                      <option value='mm'>Millimetre (mm)</option>
+                      <option value='cm'>Centimetre (cm)</option>
+                      <option value='dm'>Decimetre (dm)</option>
+                      <option value='m'>Metre</option>
+                      <option value='dkm'>Dekametre (dkm)</option>
+                      <option value='hm'>Hectometre (hm)</option>
+                      <option value='km'>Kilometre (km)</option>
+                      <option value='mym'>Myriametre (mym)</option>
+                      <option value='mmm'>Megametre (Mm)</option>
+                      <option value='ggm'>Gigametre (Gm)</option>
+                      <option value='ttm'>Terametre (Tm)</option>
+                    </optgroup>
+                  </select>
+                  <br/>
+                  <input type='number' id='conv-length-orig' value='1'/>
+                </td>
+                <td>
+                  <button id='conv-length-btn'>Convert</button>
+                </td>
+                <td>
+                  <select id='conv-length-second'>
+                    <optgroup label='Imperial'>
+                      <option value='thou'><i>Thou (th)</i></option>
+                      <option value='twip'><i>Twip (tw)</i></option>
+                      <option value='point' selected='selected'>Point (pt)</option>
+                      <option value='pica'><i>Pica (pc)</i></option>
+                      <option value='pica'><i>Poppyseed (ps)</i></option>
+                      <option value='pica'><i>Barleycorn (bc)</i></option>
+                      <option value='inch'>Inch (in)</option>
+                      <option value='hand'><i>Hand (h)</i></option>
+                      <option value='foot'>Foot (ft)</option>
+                      <option value='yard'>Yard (yd)</option>
+                      <option value='chain'><i>Chain (ch)</option>
+                      <option value='furlong'>Furlong (fl)</option>
+                      <option value='mile'>Mile (mi)</option>
+                      <option value='league'>League (lg)</option>
+                    </optgroup>
+                  </select>
+                  <br/>
+                  <input type='number' id='conv-length-orig' value='72'/>
+                </td>
+              </tr>
+              
+            </tbody>
+          </table>
+          <style>
+            #conv-body tr trd {display: none;}
+            select option i {font-family: times;}
+          </style>
+          <script>
+            // Length conversions
+            $('#conv-length-btn').addEventListener('click', function() {
+
+            });
+            $('#conv-length').addEventListener('load', function() {
+
+            });
+          </script>
+        </div>
+      </div>
     </div>
 
 
