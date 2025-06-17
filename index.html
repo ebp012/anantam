@@ -165,9 +165,11 @@
               <table class='non'>
                 <thead>
                   <tr>
-                    <td><input type="button" value="=" onClick="document.calculator.ans.value=eval(document.calculator.ans.value);document.calculator.ansTwo.value=eval(document.calculator.ans.value)" title='Show solution: Equals Sign' class='calb caln'/></td>
+                    <td><input type="button" value="=" onClick="document.calculator.ans.value=math.evaluate(document.calculator.ans.value);document.calculator.ansTwo.value=math.evaluate(document.calculator.ans.value)" title='Show solution: Equals Sign' class='calb caln'/></td>
                     <td><input type="button" value="HYPR" onclick="toggleHyperMode();" title='Toggle Hyper mode' class='calb cala'/></td>
                     <td><input type="reset" value="AC" title='All Clear' class='calb caln'/></td>
+                    <td><input type="button" value="AND" onClick="document.calculator.ans.value+='&';document.calculator.ansTwo.value+='∧';" class='calb calv'/></td>
+                    <td><input type="button" value="OR" onClick="document.calculator.ans.value+='|';document.calculator.ansTwo.value+='∨';" class='calb calv'/></td>
                   </tr>
                 </thead>
                 <tbody>
@@ -176,35 +178,34 @@
                     <td><input type='button' value='2²' onClick="document.calculator.ans.value+='2';document.calculator.ansTwo.value+='2';" class='calb caln'/></td>
                     <td><input type="button" value="3³" onClick="document.calculator.ans.value+='3';document.calculator.ansTwo.value+='3';" class='calb caln'/></td>
                     <td><input type="button" value="+" onClick="document.calculator.ans.value+='+';document.calculator.ansTwo.value+='+';" class='calb calo'/></td>
-                    <td><input type="button" value="aⁿ" onClick="document.calculator.ans.value+='**';document.calculator.ansTwo.value+='^';" class='calb calo'/></td>
+                    <td><input type="button" value="NOT" onClick="document.calculator.ans.value+='!';document.calculator.ansTwo.value+='¬';" class='calb calv'/></td>
+                    
                   </tr>
                   <tr class='numrow'>
                     <td><input type="button" value="4ⁿʳᵗ" onClick="document.calculator.ans.value+='4';document.calculator.ansTwo.value+='4';" class='calb caln'/></td>
                     <td><input type="button" value="5ˢʳᵗ" onClick="document.calculator.ans.value+='5';document.calculator.ansTwo.value+='5';" class='calb caln'/></td>
                     <td><input type="button" value="6ᶜᵇʳᵗ" onClick="document.calculator.ans.value+='6';document.calculator.ansTwo.value+='6';" class='calb caln'/></td>
                     <td><input type="button" value="-" onClick="document.calculator.ans.value+='-';document.calculator.ansTwo.value+='-';" class='calb calo'/></td>
-                    <td><input type="button" value="ⁿa" onClick="document.calculator.ans.value+='tet(';document.calculator.ansTwo.value+='tet(';" class="calo" title="Tetration"/></td>
+                    <!--<td><input type="button" value="ⁿa" onClick="document.calculator.ans.value+='tet(';document.calculator.ansTwo.value+='tet(';" class="calo" title="Tetration"/></td>-->
+                    <td><input type="button" value="XOR" onClick="document.calculator.ans.value+='~';document.calculator.ansTwo.value+='⊕';" class='calb calv'/></td>
                   </tr>
                   <tr class='numrow'>
                     <td><input type="button" value="7" onClick="document.calculator.ans.value+='7';document.calculator.ansTwo.value+='7';" class='calb caln'/></td>
                     <td><input type="button" value="8" onClick="document.calculator.ans.value+='8';document.calculator.ansTwo.value+='8';" class='calb caln'/></td>
                     <td><input type="button" value="9" onClick="document.calculator.ans.value+='9';document.calculator.ansTwo.value+='9';" class='calb caln'/></td>
                     <td><input type="button" value="&times;" onClick="document.calculator.ans.value+='*';document.calculator.ansTwo.value+='&bull;';" class='calb calo'/></td>
+                    <td><input type="button" value="aⁿ" onClick="document.calculator.ans.value+='^';document.calculator.ansTwo.value+='^';" class='calb calo'/></td>                    
                   </tr>
                   <tr class='numrow'>
                     <td><input type='button' value='.' onClick="document.calculator.ans.value+='.';document.calculator.ansTwo.value+='.';" title='Decimal' class='calb cala'/></td>
                     <td><input type="button" value="0" onClick="document.calculator.ans.value+='0';document.calculator.ansTwo.value+='0';" title='Zero' class='calb caln'/></td>
                     <td><input type='button' value=',' onClick="document.calculator.ans.value+=',';document.calculator.ansTwo.value+=',';" title='Comma' class='calb cala'/></td>
                     <td><input type="button" value="÷" onClick="document.calculator.ans.value+='/';document.calculator.ansTwo.value+='÷';" class='calb calo'/></td>
-                    <td><input type="button" value="R" onClick="document.calculator.ans.value+='%';document.calculator.ansTwo.value+='R';" class='calb calo'/></td>
+                    <td><input type="button" value="R" onClick="document.calculator.ans.value+='%';document.calculator.ansTwo.value+='mod';" class='calb calo'/></td>
                   </tr>
                   <tr class='numrow'>
                     <td><input type='button' value='(' onClick="document.calculator.ans.value+='(';document.calculator.ansTwo.value+='(';" title='Opening Parentheses' class='calb cala'/></td>
                     <td><input type='button' value=')' onClick="document.calculator.ans.value+=')';document.calculator.ansTwo.value+=')';" title='Closing Parentheses' class='calb cala'/></td>
-                  </tr>
-                  <tr class="numrow">
-                    <td><input type="button" value="x" onClick="document.calculator.ans.value+='x';document.calculator.ansTwo.value+='x';" class='calb calv' disabled='disabled'/></td>
-                    <td><input type="button" value="y" onClick="document.calculator.ans.value+='y';document.calculator.ansTwo.value+='y';" class='calb calv' disabled='disabled'/></td>
                     <td><input type='button' value='&pi;' onclick='document.calculator.ans.value+="3.14159265358979323846264";document.calculator.ansTwo.value+="&pi;";'  class='calb cala'/></td>
                     <td><input type="button" value="e" onclick="document.calculator.ans.value+='2.71828182845904523536028';document.calculator.ansTwo.value+='e';" class='calb cala'/></td>
                   </tr>
