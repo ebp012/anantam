@@ -200,6 +200,171 @@
             </form>
         </div>
       </div>
+      <div id='algebra' class='content-section'>
+        <h1 class="page-title">Algebra</h1>
+        <div class="desk-paper" style='line-height: 36pt;'>
+          <button id='geometry-toggle'>Geometry</button>
+          <div id="regularPolygonArea" onmouseover="polygon.areaR();">
+            <h2>Regular Polygon</h2>
+            Sides (&#x2265;3):
+            <input
+              type="number"
+              min="3"
+              id="sidesCRPA"
+              value="3"
+              step="1"
+              onkeyup="polygon.areaR();"
+            /><br />
+            Side Length (&gt;0):<input
+              type="number"
+              min="0.000000001"
+              id="lengthCRPA"
+              value="6"
+              step="0.1"
+              onkeyup="polygon.areaR();"
+            /><br />
+            <p>Area: <span id="areaCRPA"></span></p>
+            <script>
+              const polygon = {
+                areaR: function (n1, s1) {
+                  var n = Number(document.getElementById("sidesCRPA").value);
+                  var s = Number(document.getElementById("lengthCRPA").value);
+                  if (n1 != undefined) {
+                    n = n1;
+                  }
+                  if (s1 != undefined) {
+                    s = s1;
+                  }
+
+                  if (n >= 3 && s > 0) {
+                    var area0 =
+                      ((1 / 4) * n * (s * s) * 1) / Math.tan(Math.PI / n);
+                    var area = Math.round(area0 * 100000000) / 100000000;
+                    if (!(n1 == undefined || s1 == undefined)) {
+                      return area;
+                    }
+                    document.getElementById("areaCRPA").innerText = area;
+                  } else {
+                    document.getElementById("areaCRPA").innerText =
+                      "Invalid inputs.";
+                  }
+                },
+              };
+            </script>
+          </div>
+          <hr />
+          <div id="pascalsSimplex" onmouseover="pascal.calc();">
+            <h2>Pascal's <var>m</var>-simplex</h2>
+            Dimension &#x2115;(m&#x2265;2):
+            <input
+              type="number"
+              min="1"
+              id="dimensionsCPS"
+              value="2"
+              step="1"
+              oninput="pascal.addDimension();"
+            />
+            <div id="addDimensionsCPS"></div>
+            <p>Value: <span id="valueCPS"></span></p>
+            <script>
+              var pascal = {
+                oldNoD: 2,
+                addDimension: function () {
+                  var noD = Number(
+                    document.getElementById("dimensionsCPS").value
+                  );
+                  var adC = document.getElementById("addDimensionsCPS");
+                  adC.innerHTML = "";
+                  if (noD < 1) {
+                    adC.innerHTML = "Invalid dimension.";
+                  }
+                  for (var i = 0; i <= noD - 2; i++) {
+                    if (i != 0) {
+                      adC.innerHTML += "<br/>";
+                    }
+                    adC.innerHTML +=
+                      "<var>n</var><sub>" +
+                      i +
+                      "</sub> &#x2115;(0 <u>&lt;</u> <var>n</var><sub>" +
+                      i +
+                      "</sub> <u>&lt;</u> <var>n</var><sub>" +
+                      (i + 1) +
+                      '</sub>): <input type="number" min="0" id="n' +
+                      i +
+                      'CPS" value="2" step="1" onkeyup="pascal.findMax();"/>';
+                  }
+                  adC.innerHTML +=
+                    "<br/><var>n</var><sub>" +
+                    (noD - 1) +
+                    "</sub> &#x2115;(0 <u>&lt;</u> <var>n</var><sub>" +
+                    (noD - 1) +
+                    '</sub> <u>&lt;</u> &#x221e;): <input type="number" min="0" id="n' +
+                    (noD - 1) +
+                    'CPS" value="2" step="1" onkeyup="pascal.findMax();"/>';
+                },
+                fixMax: function () {
+                  var noD = Number(
+                    document.getElementById("dimensionsCPS").value
+                  );
+                  for (var i = 0; i <= noD - 1; i++) {
+                    var z = Number(
+                      document.querySelector("#n" + (i + 1) + "CPS").value
+                    );
+                    document.querySelector("#n" + i + "CPS").max = z;
+                  }
+                },
+                factorial: function (n) {
+                  if (n <= 1) {
+                    return 1;
+                  } else {
+                    let result = 1;
+                    for (let i = 1; i <= n; i++) {
+                      result *= i;
+                    }
+                    return result;
+                  }
+                },
+                calc: function () {
+                  var m = Number(document.getElementById("dimensionsCPS").value);
+                  var a = 1;
+                  var cont = true;
+                  for (var i = 0; i <= m - 1; i++) {
+                    var first = document.querySelector("#n" + i + "CPS").value;
+                    var second = Infinity;
+                    if (i + 1 != m) {
+                      second = document.querySelector(
+                        "#n" + (i + 1) + "CPS"
+                      ).value;
+                    }
+                    if (first > second || first < 0) {
+                      cont = false;
+                      a = "Invalid inputs.";
+                      break;
+                    }
+                  }
+                  for (var p = 1; p <= m - 1 && cont == true; p++) {
+                    var np = Number(
+                      document.getElementById("n" + p + "CPS").value
+                    );
+                    var np_1 = Number(
+                      document.getElementById("n" + (p - 1).toString() + "CPS")
+                        .value
+                    );
+                    a *=
+                      pascal.factorial(np) /
+                      (pascal.factorial(np_1) * pascal.factorial(np - np_1));
+                  }
+                  document.getElementById("valueCPS").innerText = a;
+                },
+              };
+              $(document).ready(() => {
+                pascal.addDimension();
+              });
+            </script>
+          </div>
+          <br/><br/><br/><br/><br/><br/>
+        </div>
+      </div>
     </div>
 
 
