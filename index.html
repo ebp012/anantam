@@ -1,6 +1,15 @@
 <!doctype html>
 <html>
   <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=TAG_ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'TAG_ID');
+    </script>
     <title>Anantam</title>
     <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'/>
     <meta name='theme-color' content='#7C614D'/> <!-- Safari navbar theme -->
@@ -76,9 +85,10 @@
                     xr-offset: <input id='graph-offset-xr' type='number' step='1' value='0'/><br/>
                     yr-offset: <input id='graph-offset-yr' type='number' step='1' value='0'/><br/>
                     yi-offset: <input id='graph-offset-yi' type='number' step='1' value='0'/><br/>
+                    <button id='graph-btn' onclick='graphFunction();'>Graph</button>
                     <div class='graph-adv'>
+                      <hr/>
                       Tick height: <input id='graph-tick-height' type='number' step='0.5' value='2.5'/><br/>
-                      <button id='graph-btn' onclick='graphFunction();'>Graph</button><br/><hr/>
                       <form>
                         X-axis<br/>
                         <input type='radio' name='graph-dimension-x' id='graph-dimension-xr' checked='checked'/><label for='graph-dimension-xr'>Real only</label><br/>
@@ -181,16 +191,16 @@
                 <tbody>
                   <tr class='numrow'>
                     <td><input type='button' value='1ⁱ' onClick="document.calculator.ans.value+='1';document.calculator.ansTwo.value+='1';" class='calb caln'/></td>
-                    <td><input type='button' value='2²' onClick="document.calculator.ans.value+='2';document.calculator.ansTwo.value+='2';" class='calb caln'/></td>
-                    <td><input type="button" value="3³" onClick="document.calculator.ans.value+='3';document.calculator.ansTwo.value+='3';" class='calb caln'/></td>
+                    <td><input type='button' value='2' onClick="document.calculator.ans.value+='2';document.calculator.ansTwo.value+='2';" class='calb caln'/></td>
+                    <td><input type="button" value="3" onClick="document.calculator.ans.value+='3';document.calculator.ansTwo.value+='3';" class='calb caln'/></td>
                     <td><input type="button" value="+" onClick="document.calculator.ans.value+='+';document.calculator.ansTwo.value+='+';" class='calb calo'/></td>
                     <td><input type="button" value="NOT" onClick="document.calculator.ans.value+='!';document.calculator.ansTwo.value+='¬';" class='calb calv'/></td>
                     
                   </tr>
                   <tr class='numrow'>
-                    <td><input type="button" value="4ⁿʳᵗ" onClick="document.calculator.ans.value+='4';document.calculator.ansTwo.value+='4';" class='calb caln'/></td>
-                    <td><input type="button" value="5ˢʳᵗ" onClick="document.calculator.ans.value+='5';document.calculator.ansTwo.value+='5';" class='calb caln'/></td>
-                    <td><input type="button" value="6ᶜᵇʳᵗ" onClick="document.calculator.ans.value+='6';document.calculator.ansTwo.value+='6';" class='calb caln'/></td>
+                    <td><input type="button" value="4" onClick="document.calculator.ans.value+='4';document.calculator.ansTwo.value+='4';" class='calb caln'/></td>
+                    <td><input type="button" value="5" onClick="document.calculator.ans.value+='5';document.calculator.ansTwo.value+='5';" class='calb caln'/></td>
+                    <td><input type="button" value="6" onClick="document.calculator.ans.value+='6';document.calculator.ansTwo.value+='6';" class='calb caln'/></td>
                     <td><input type="button" value="-" onClick="document.calculator.ans.value+='-';document.calculator.ansTwo.value+='-';" class='calb calo'/></td>
                     <!--<td><input type="button" value="ⁿa" onClick="document.calculator.ans.value+='tet(';document.calculator.ansTwo.value+='tet(';" class="calo" title="Tetration"/></td>-->
                     <td><input type="button" value="XOR" onClick="document.calculator.ans.value+='~';document.calculator.ansTwo.value+='⊕';" class='calb calv'/></td>
@@ -389,12 +399,11 @@
       <div id='units' class='content-section active'>
         <h1 class="page-title">Units</h1>
         <div class="desk-paper" style='line-height: 36pt;'>
-          <h3>General table</h3>
           <table class='non'>
             <thead>
               <tr>
                 <td colspan='3'>
-                  <select>
+                  <select id='conv-unit-type' oninput='selectUnitType();'>
                     <optgroup label='Base units'>
                       <option value='length'>Length</option>
                       <option value='time'>Time</option>
@@ -414,34 +423,37 @@
                       <option value='angle'>Angle</option>
                       <option value='angle3d'>3D angle</option>
                       <option value='angle4d'>4D angle</option>
+                      <option value='radiation'>Radiation dose</option>
                     </optgroup>
                   </select>
                 </td>
               <tr>
                 <td>Unit</td>
-                <td></td>
+                <td>-</td>
                 <td>Convert</td>
               </tr>
             </thead>
             <tbody id='conv-body'>
               <tr>
-                <td id='conv-length'>
+                <td>
                   <select id='conv-length-first'>
                     <optgroup label='Imperial'>
-                      <option value='thou'><i>Thou (th)</i></option>
-                      <option value='twip'><i>Twip (tw)</i></option>
-                      <option value='point'>Point (pt)</option>
-                      <option value='pica'><i>Pica (pc)</i></option>
-                      <option value='pica'><i>Poppyseed (ps)</i></option>
-                      <option value='pica'><i>Barleycorn (bc)</i></option>
-                      <option value='inch' selected='selected'>Inch (in)</option>
-                      <option value='hand'><i>Hand (h)</i></option>
-                      <option value='foot'>Foot (ft)</option>
-                      <option value='yard'>Yard (yd)</option>
-                      <option value='chain'><i>Chain (ch)</option>
-                      <option value='furlong'>Furlong (fl)</option>
-                      <option value='mile'>Mile (mi)</option>
-                      <option value='league'>League (lg)</option>
+                      <option value='th'><i>Thou (th)</i></option>
+                      <option value='tw'><i>Twip (tw)</i></option>
+                      <option value='pt'>Point (pt)</option>
+                      <option value='pc'><i>Pica (pc)</i></option>
+                      <option value='ps'><i>Poppyseed (ps)</i></option>
+                      <option value='bc'><i>Barleycorn (bc)</i></option>
+                      <option value='in' selected='selected'>Inch (in)</option>
+                      <option value='hd'><i>Hand (hd)</i></option>
+                      <option value='lk'>Link (lk)</option>
+                      <option value='ft'>Foot (ft)</option>
+                      <option value='yd'>Yard (yd)</option>
+                      <option value='rd'>Rod (rd)</option>
+                      <option value='ch'><i>Chain (ch)</i></option>
+                      <option value='fl'>Furlong (fl)</option>
+                      <option value='mi'>Mile (mi)</option>
+                      <option value='lg'>League (lg)</option>
                     </optgroup>
                     <optgroup label='Metric/SI'>
                       <option value='qm'>Quectometre (qm)</option>
@@ -454,11 +466,11 @@
                       <option value='pm'>Picometre (pm)</option>
                       <option value='nm'>Nanometre (nm)</option>
                       <option value='μm'>Micrometre (μm)</option>
-                      <option value='mam'>Myriametre (mam)</option>
+                      <option value='mam'>Myriometre (mam)</option>
                       <option value='mm'>Millimetre (mm)</option>
                       <option value='cm'>Centimetre (cm)</option>
                       <option value='dm'>Decimetre (dm)</option>
-                      <option value='m'>Metre</option>
+                      <option value='m'>Metre (m)</option>
                       <option value='dkm'>Dekametre (dkm)</option>
                       <option value='hm'>Hectometre (hm)</option>
                       <option value='km'>Kilometre (km)</option>
@@ -466,35 +478,122 @@
                       <option value='mmm'>Megametre (Mm)</option>
                       <option value='ggm'>Gigametre (Gm)</option>
                       <option value='ttm'>Terametre (Tm)</option>
+                      <option value='ppm'>Petametre (Pm)</option>
+                      <option value='eem'>Exametre (Em)</option>
+                      <option value='zzm'>Zettametre (Zm)</option>
+                      <option value='yym'>Yottametre (Ym)</option>
+                      <option value='rrm'>Ronnametre (Rm)</option>
+                      <option value='qqm'>Quettametre (Qm)</option>
+                      <option value='kqqm'>Kiloquettametre (kQm)</option>
+                      <option value='myqqm'>Myriaquettametre (myQm)</option>
+                      <option value='mmqqm'>Megaquettametre (MQm)</option>
+                      <option value='ggqqm'>Gigaquettametre (GQm)</option>
+                      <option value='ttqqm'>Teraquettametre (TQm)</option>
+                    </optgroup>
+                    <optgroup label='Other + Humourous'>
+                      <option value='parsec'>Parsec</option>
+                      <option value='ly'>Light year (ly)</option>
+                      <option value='au'>Astronomical unit (AU)</option>
+                      <option value='pl'>Planck length (pl)</option>
+                      <option value='aparsec'>Attoparsec</option>
+                      <option value='smoot'>Smoot</option>
+                      <option value='s-d'>Light second (ls)</option>
+                      <option value='min-d'>Light minute (lmin)</option>
+                      <option value='hr-d'>Light hour (lhr)</option>
+                      <option value='d-d'>Light day (ld)</option>
+                      <option value='w-d'>Light week (lw)</option>
+                      <option value='fn-d'>Light fortnight (lfn)</option>
+                      <option value='lm-d'>Light lunar month (llm)</option>
+                      <option value='jjy-d'>Light Julian year (lJy)</option>
+                      <option value='ly-d'>Light lunar year (lly)</option>
+                      <option value='oy-d'>Light orbital year (loy)</option>
+                      <option value='gy-d'>Light galactic year (lgy)</option>
                     </optgroup>
                   </select>
                   <br/>
-                  <input type='number' id='conv-length-orig' value='1'/>
+                  <input type='number' id='conv-length-input' value='1'/>
                 </td>
                 <td>
-                  <button id='conv-length-btn'>Convert</button>
+                  <button id='conv-length-btn'>Convert</button><br/>
+                  <button id='conv-length-flip'>Flip</button>
                 </td>
                 <td>
                   <select id='conv-length-second'>
                     <optgroup label='Imperial'>
-                      <option value='thou'><i>Thou (th)</i></option>
-                      <option value='twip'><i>Twip (tw)</i></option>
-                      <option value='point' selected='selected'>Point (pt)</option>
-                      <option value='pica'><i>Pica (pc)</i></option>
-                      <option value='pica'><i>Poppyseed (ps)</i></option>
-                      <option value='pica'><i>Barleycorn (bc)</i></option>
-                      <option value='inch'>Inch (in)</option>
-                      <option value='hand'><i>Hand (h)</i></option>
-                      <option value='foot'>Foot (ft)</option>
-                      <option value='yard'>Yard (yd)</option>
-                      <option value='chain'><i>Chain (ch)</option>
-                      <option value='furlong'>Furlong (fl)</option>
-                      <option value='mile'>Mile (mi)</option>
-                      <option value='league'>League (lg)</option>
+                      <option value='th'><i>Thou (th)</i></option>
+                      <option value='tw'><i>Twip (tw)</i></option>
+                      <option value='pt' selected='selected'>Point (pt)</option>
+                      <option value='pc'><i>Pica (pc)</i></option>
+                      <option value='ps'><i>Poppyseed (ps)</i></option>
+                      <option value='bc'><i>Barleycorn (bc)</i></option>
+                      <option value='in' >Inch (in)</option>
+                      <option value='hd'><i>Hand (hd)</i></option>
+                      <option value='lk'>Link (lk)</option>
+                      <option value='ft'>Foot (ft)</option>
+                      <option value='yd'>Yard (yd)</option>
+                      <option value='rd'>Rod (rd)</option>
+                      <option value='ch'><i>Chain (ch)</i></option>
+                      <option value='fl'>Furlong (fl)</option>
+                      <option value='mi'>Mile (mi)</option>
+                      <option value='lg'>League (lg)</option>
+                    </optgroup>
+                    <optgroup label='Metric/SI'>
+                      <option value='qm'>Quectometre (qm)</option>
+                      <option value='rm'>Rontometre (rm)</option>
+                      <option value='ym'>Yoctometre (ym)</option>
+                      <option value='zm'>Zeptometre (zm)</option>
+                      <option value='am'>Attometre (am)</option>
+                      <option value='fm'>Femtometre (fm)</option>
+                      <option value='åm'>Ångstrom (Å)</option>
+                      <option value='pm'>Picometre (pm)</option>
+                      <option value='nm'>Nanometre (nm)</option>
+                      <option value='μm'>Micrometre (μm)</option>
+                      <option value='mam'>Myriometre (mam)</option>
+                      <option value='mm'>Millimetre (mm)</option>
+                      <option value='cm'>Centimetre (cm)</option>
+                      <option value='dm'>Decimetre (dm)</option>
+                      <option value='m'>Metre (m)</option>
+                      <option value='dkm'>Dekametre (dkm)</option>
+                      <option value='hm'>Hectometre (hm)</option>
+                      <option value='km'>Kilometre (km)</option>
+                      <option value='mym'>Myriametre (mym)</option>
+                      <option value='mmm'>Megametre (Mm)</option>
+                      <option value='ggm'>Gigametre (Gm)</option>
+                      <option value='ttm'>Terametre (Tm)</option>
+                      <option value='ppm'>Petametre (Pm)</option>
+                      <option value='eem'>Exametre (Em)</option>
+                      <option value='zzm'>Zettametre (Zm)</option>
+                      <option value='yym'>Yottametre (Ym)</option>
+                      <option value='rrm'>Ronnametre (Rm)</option>
+                      <option value='qqm'>Quettametre (Qm)</option>
+                      <option value='kqqm'>Kiloquettametre (kQm)</option>
+                      <option value='myqqm'>Myriaquettametre (myQm)</option>
+                      <option value='mmqqm'>Megaquettametre (MQm)</option>
+                      <option value='ggqqm'>Gigaquettametre (GQm)</option>
+                      <option value='ttqqm'>Teraquettametre (TQm)</option>
+                    </optgroup>
+                    <optgroup label='Other + Humourous'>
+                      <option value='parsec'>Parsec</option>
+                      <option value='ly'>Light year (ly)</option>
+                      <option value='au'>Astronomical unit (AU)</option>
+                      <option value='pl'>Planck length (pl)</option>
+                      <option value='aparsec'>Attoparsec</option>
+                      <option value='smoot'>Smoot</option>
+                      <option value='s-d'>Light second (ls)</option>
+                      <option value='min-d'>Light minute (lmin)</option>
+                      <option value='hr-d'>Light hour (lhr)</option>
+                      <option value='d-d'>Light day (ld)</option>
+                      <option value='w-d'>Light week (lw)</option>
+                      <option value='fn-d'>Light fortnight (lfn)</option>
+                      <option value='lm-d'>Light lunar month (llm)</option>
+                      <option value='jjy-d'>Light Julian year (lJy)</option>
+                      <option value='ly-d'>Light lunar year (lly)</option>
+                      <option value='oy-d'>Light orbital year (loy)</option>
+                      <option value='gy-d'>Light galactic year (lgy)</option>
                     </optgroup>
                   </select>
                   <br/>
-                  <input type='number' id='conv-length-orig' value='72'/>
+                  <input type='number' id='conv-length-output' value='72' readonly/>
                 </td>
               </tr>
               
@@ -506,14 +605,355 @@
           </style>
           <script>
             // Length conversions
-            $('#conv-length-btn').addEventListener('click', function() {
+            const lengthFactors = {
+              // --- Imperial (inches as base) ---
+              'th': 1 / 1000,
+              'tw': 1 / 1440,
+              'pt': 1 / 72,
+              'pc': 1 / 6,
+              'ps': 1 / 85.5,
+              'bc': 1 / 3,
+              'in': 1,
+              'hd': 4,
+              'lk': 7.92,
+              'ft': 12,
+              'yd': 36,
+              'rd': 198,
+              'ch': 792,
+              'fl': 7920,
+              'mi': 63360,
+              'lg': 190080,
 
+              // --- Metric (metres as base, then converted to inches) ---
+              'qm': 3.937e-14,
+              'rm': 3.937e-13,
+              'ym': 3.937e-12,
+              'zm': 3.937e-11,
+              'am': 3.937e-10,
+              'fm': 3.937e-9,
+              'åm': 3.937e-9,
+              'pm': 3.937e-8,
+              'nm': 3.937e-6,
+              'μm': 3.937e-5,
+              'mm': 0.03937,
+              'cm': 0.3937,
+              'dm': 3.937,
+              'm': 39.37,
+              'dkm': 393.7,
+              'hm': 3937,
+              'km': 39370,
+              'mam': 393700,
+              'mmm': 39370000,
+              'ggm': 3.937e10,
+              'ttm': 3.937e13,
+              'ppm': 3.937e16,
+              'eem': 3.937e19,
+              'zzm': 3.937e22,
+              'yym': 3.937e25,
+              'rrm': 3.937e28,
+              'qqm': 3.937e31,
+              'kqqm': 3.937e34,
+              'myqqm': 3.937e35,
+              'mmqqm': 3.937e37,
+              'ggqqm': 3.937e40,
+              'ttqqm': 3.937e43,
+              'ppqqm': 3.937e46,
+              'eeqqm': 3.937e49,
+              'zzqqm': 3.937e52,
+              'yyqqm': 3.937e55,
+              'rrqqm': 3.937e58,
+              'qqqqm': 3.937e61,
+
+              // --- Astronomical + Funny Units (converted to inches) ---
+              'pl': 6.3e-35 * 39.37,
+              'smoot': 67,
+              'aparsec': 1.012e21,
+              'parsec': 3.08567758e18 * 39.37,
+              'ly': 9.461e15 * 39.37,
+              'au': 1.496e11 * 39.37,
+              's-d': (1/299792458) * 39.37,
+              'min-d': 60 * (1/299792458) * 39.37,
+              'hr-d': 60 * 60 * (1/299792458) * 39.37,
+              'd-d': 24 * 60 * 60 * (1/299792458) * 39.37,
+              'w-d': 7 * 24 * 60 * 60 * (1/299792458) * 39.37,
+              'fn-d': 14 * 24 * 60 * 60 * (1/299792458) * 39.37,
+              'lm-d': 29.5 * 24 * 60 * 60 * (1/299792458) * 39.37,
+              'jjy-d': 365 * 24 * 60 * 60 * (1/299792458) * 39.37,
+              'ly-d': 29.5 * 12 * 24 * 60 * 60 * (1/299792458) * 39.37,
+              'oy-d': 365.2471 * 24 * 60 * 60 * (1/299792458) * 39.37,
+              'gy-d': 225 * 10 ** 6 * 365.2471 * 24 * 60 * 60 * (1/299792458) * 39.37,
+            };
+
+            document.getElementById('conv-length-btn').addEventListener('click', function () {
+              const conversion = document.getElementById('conv-unit-type').value;
+              const fromUnit = document.getElementById('conv-length-first').value;
+              const toUnit = document.getElementById('conv-length-second').value;
+              const input = parseFloat(document.getElementById('conv-length-input').value);
+
+              if (isNaN(input)) {
+                alert('Please enter a valid number');
+                return;
+              }
+              const inches = input * (lengthFactors[fromUnit] || 1);
+              const converted = inches / (lengthFactors[toUnit] || 1);
+
+              document.getElementById('conv-length-output').value = converted;
+              $('#conv-length-input').style.color = 'black';
+              $('#conv-length-output').style.color = 'black';
             });
-            $('#conv-length').addEventListener('load', function() {
 
+            // Flip button
+            document.getElementById('conv-length-flip').addEventListener('click', function () {
+              const select1 = document.getElementById('conv-length-first');
+              const select2 = document.getElementById('conv-length-second');
+
+              const tempValue = select1.value;
+              select1.value = select2.value;
+              select2.value = tempValue;
+
+              // Optional: also swap the values if you want to visually reverse them
+              const input = document.getElementById('conv-length-input');
+              const output = document.getElementById('conv-length-output');
+
+              const tempNum = input.value;
+              input.value = output.value;
+              output.value = tempNum;
+              input.style.color = 'red';
+              output.style.color = 'red';
             });
           </script>
         </div>
+      </div>
+
+      <div id='chemistry' class='content-section active'>
+        <h1 class="page-title">Chemistry</h1>
+        <div class="desk-paper" style='line-height: 36pt;'>
+          <input type='number' oninput='showElement(this.value)'/>
+          <h2>Chemical Element Information</h2>
+          <table class='non'>
+            <thead>
+              <tr>
+                <td colspan='2'>Property</td>
+                <td>Value</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td rowspan='6'><strong>Nomenclature</strong></td>
+                <td><strong>Atomic Number</strong></td>
+                <td id='atom-num'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Element Name</strong></td>
+                <td id='atom-name'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Covalent Name</strong></td>
+                <td id='atom-covalent'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Element Symbol</strong></td>
+                <td id='atom-name'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Element Coordinate</strong></td>
+                <td id='atom-coords'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Atomic Mass</strong></td>
+                <td id='atom-mass'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Element Type</strong></td>
+                <td id='atom-type'>?</td>
+              </tr>
+              <tr>
+                <td rowspan='6'><strong>Phases</strong></td>
+                <td><strong>Melting Point (<abbr title='standard temperature and pressure'>STP</abbr>)</strong></td>
+                <td id='atom-melt'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Boiling Point (STP)</strong></td>
+                <td id='atom-boil'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Heat of Ionisation</strong></td>
+                <td id='atom-plasma'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Triple Point</strong></td>
+                <td id='atom-triple'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Critical Point</strong></td>
+                <td id='atom-supercritical'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Heat of Fusion</strong></td>
+                <td id='atom-fusion'>?</td>
+              </tr>
+              <tr>
+                <td rowspan='4'><strong>Abundance</strong>
+                <td><strong>Discovery</strong></td>
+                <td id='atom-discovery'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Synthetic?</strong></td>
+                <td id='atom-synthetic'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Common Isotopes</strong></td>
+                <td id='atom-isotopes'>?</td>
+              </tr>
+              <tr>
+                <td><strong>Price</strong></td>
+                <td id='atom-price'>?</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <script>
+          const elementRoots = [
+            [0, 'neutronium', 'neutride', 'Nu'],
+            [1, 'hydrogen', 'hydride', 'H'],
+            [2, 'helium', 'helide', 'He'],
+            [3, 'lithium', 'lithide', 'Li'],
+            [4, 'beryllium', 'beryllide', 'Be'],
+            [5, 'boron', 'boride', 'B'],
+            [6, 'carbon', 'carbide', 'C'],
+            [7, 'nitrogen', 'nitride', 'N'],
+            [8, 'oxygen', 'oxide', 'O'],
+            [9, 'fluorine', 'fluoride', 'F'],
+            [10, 'neon', 'neide', 'Ne'],
+            [11, 'sodium', 'sodide', 'Na'],
+            [12, 'magnesium', 'magneside', 'Mg'],
+            [13, 'aluminium', 'alumide', 'Al'],
+            [14, 'silicon', 'silicide', 'Si'],
+            [15, 'phosphorous', 'phosphide', 'P'],
+            [16, 'sulphur', 'sulphide', 'S'],
+            [17, 'chlorine', 'chloride', 'Cl'],
+            [18, 'argon', 'argide', 'Ar'],
+            [19, 'potassium', 'potasside', 'K'],
+            [20, 'calcium', 'calcide', 'Ca'],
+            [21, 'scandium', 'scandide', 'Sc'],
+            [22, 'titanium', 'titanide', 'Ti'],
+            [23, 'vanadium', 'vanadide', 'V'],
+            [24, 'chromium', 'chromide', 'Cr'],
+            [25, 'manganese', 'manganide', 'Ma'],
+            [26, 'iron', 'ferride', 'Fe'],
+            [27, 'cobalt', 'cobaltide', 'Co'],
+            [28, 'nickel', 'nickelide', 'Ni'],
+            [29, 'copper', 'cupride', 'Cu'],
+            [30, 'zinc', 'zincide', 'Zn'],
+            [31, 'gallium', 'gallide', 'Ga'],
+            [32, 'germanium', 'germanide', 'Ge'],
+            [33, 'arsenic', 'arsenide', 'As'],
+            [34, 'selenium', 'selenide', 'Se'],
+            [35, 'bromine', 'bromide', 'Br'],
+            [36, 'krypton', 'kryptide', 'Kr'],
+            [37, 'rubidium', 'rubide'],
+            [38, 'strontium', 'strontide'],
+            [39, 'yttrium', 'yttride'],
+            [40, 'zirconium', 'zirconide'],
+            [41, 'niobium', 'niobide'],
+            [42, 'molybdenum', 'molybdenide'],
+            [43, 'technetium', 'technetide'],
+            [44, 'ruthenium', 'ruthenide'],
+            [45, 'rhodium', 'rhodide'],
+            [46, 'palladium', 'palladide'],
+            [47, 'silver', 'argentide'],
+            [48, 'cadmium', 'cadmide'],
+            [49, 'indium', 'indide'],
+            [50, 'tin', 'stannide'],
+            [51, 'antimony', 'stibide'],
+            [52, 'tellurium', 'telluride'],
+            [53, 'iodine', 'iodide'],
+            [54, 'xenon', 'xenide'],
+            [55, 'caesium', 'caeside'],
+            [56, 'barium', 'baride'],
+            [57, 'lanthanum', 'lanthanide'],
+            [58, 'cerium', 'cereide'],
+            [59, 'praseodymium', 'praseodymide'],
+            [60, 'neodymium', 'neodymide'],
+            [61, 'promethium', 'promethide'],
+            [62, 'samarium', 'samaride'],
+            [63, 'europium', 'europium'],
+            [64, 'gadolinium', 'gadolinide'],
+            [65, 'terbium', 'terbide'],
+            [66, 'dysprosium', 'dysproside'],
+            [67, 'holmium', 'holmide'],
+            [68, 'erbium', 'erbide'],
+            [69, 'thulium', 'thulide'],
+            [70, 'ytterbium', 'ytterbide'],
+            [71, 'lutetium', 'lutetide'],
+            [72, 'hafnium', 'hafnide'],
+            [73, 'tantalum', 'tantalide'],
+            [74, 'tungsten', 'wolframide'],
+            [75, 'rhenium', 'rhenide'],
+            [76, 'osmium', 'osmide'],
+            [77, 'iridium', 'iridide'],
+            [78, 'platinum', 'platinide'],
+            [79, 'gold', 'auride'],
+            [80, 'mercury', 'hydragyride'],
+            [81, 'thallium', 'thallide'],
+            [82, 'lead', 'plumbide'],
+            [83, 'bismuth', 'bismide'],
+            [84, 'polonium', 'polonide'],
+            [85, 'astatine', 'astatide'],
+            [86, 'radon', 'randide'],
+            [87, 'francium', 'francide'],
+            [88, 'radium', 'radide'],
+            [89, 'actinium', 'actinide'],
+            [90, 'thorium', 'thoride'],
+            [91, 'protractinium', 'protractinide'],
+            [92, 'uranium', 'uranide'],
+            [93, 'neptunium', 'neptunide'],
+            [94, 'plutonium', 'plutonide'],
+            [95, 'americium', 'americide'],
+            [96, 'curium', 'curide'],
+            [97, 'berkelium', 'berkelide'],
+            [98, 'californium', 'californide'],
+            [99, 'einsteinium', 'einsteinide'],
+            [100, 'fermium', 'fermide'],
+            [101, 'mendelevium', 'mendelevide'],
+            [102, 'nobelium', 'nobelide'],
+            [103, 'lawrencium', 'lawrencide'],
+            [104, 'rutherfordium', 'rutherfordide'],
+            [105, 'dubnium', 'dubnide'],
+            [106, 'seaborgium', 'seaborgide'],
+            [107, 'bohrium', 'bohride'],
+            [108, 'hassium', 'hasside'],
+            [109, 'meitnerium', 'meitneride'],
+            [110, 'darmstadtium', 'darmstadtide'],
+            [111, 'röntgenium', 'röntgenide'],
+            [112, 'copernicium', 'copernicide'],
+            [113, 'nihonium', 'nihonide'],
+            [114, 'flerovium', 'flerovide'],
+            [115, 'moscovium', 'muscovide'],
+            [116, 'livermorium', 'livermoride'],
+            [117, 'tennessine', 'tennesside'],
+            [118, 'oganesson', 'oganesside'],
+            [119, 'ununennium', 'ununennide'],
+            [120, 'unbinilium', 'unbinilide'],
+            [121, 'unbiunium', 'unbiunide'],
+            [122, 'unbibium', 'unbibide'],
+            [123, 'unbitrium', 'unbitride'],
+            [124, 'unbiquadium', 'unbiquadide'],
+            [125, 'unbipentium', 'unbipentide'],
+            [126, 'unbihexium', 'unbihexide'],
+            [127, 'unbiseptium', 'unbiseptide'],
+            [128, 'unbioctium', 'unbioctide'],
+            [129, 'unbiennium', 'unbiennide'],
+            [130, 'untrinilium', 'untrinilide'],
+            [131, 'untriunium', 'untriunide'],
+            [132, 'untribium', 'untribide'],
+            [133, 'untritrium', 'untritride'],
+            [134, 'untriquadium', 'untriquadide'],
+            [135, 'untripentium', 'untripentide'],
+            [136, 'untrihexium', 'untrihexide'],
+            [137, 'feynmanium', 'feynmanide']
+          ];
+        </script>
       </div>
     </div>
 
@@ -590,6 +1030,14 @@
           else {
             do3D = false;
           }
+          // Update whether to show the graph button
+          if ($('#graph-auto').checked != true) {
+            $('#graph-btn').style.display = 'block';
+          }
+          else {
+            $('#graph-btn').style.display = 'none';
+          }
+
           // Continuously (every 37 ms) check for changes in xr,xi,yr,yi and push to span
           var textx = '', texty = '';
           // Mirror the value of x
@@ -1012,8 +1460,14 @@
       function solve (x, i, solveComplex, whence) {
         if (whence == undefined) whence = 1;
         // Read the function input
-        let scope = { x: math.complex(x, i) };
+        let scope = {
+          x: math.complex(x, i),
+          tet: tet,
+        };
         var functext = $('#function-input').value.toString();
+        functext = functext.replace(/([\d\w\)\.]+)\s*\^\^\s*([\d\w\(\)\.]+)/g, 'tet($1,$2)'); // Tetration
+        functext = functext.replace('{','(').replace('}', ')'); // Minimal LaTeX cross-compatibility
+        functext = functext.replace(/\|([^|]+)\|/g, 'abs($1)'); // Absolute value
         // Constant Functions
         if (countOccurrences(functext, 'x') == 0) functext = '(' + functext + ')x^0';
         // Finalise the function
@@ -1029,15 +1483,16 @@
 
       function graphFunction () {
         var roc = false;
-        ctx.setTransform(1, 0, 0, 1, 0, 0)
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.translate(canvas.width/2 + 5 * toffxr, canvas.height/2 + 5 * toffyr);
         drawGrid(Number($('#graph-major-step').value), Number($('#graph-minor-step').value));
         if (do3D == true) drawGrid3D();
         ctx.strokeStyle = $('#function-colour').value;
-        ctx.lineWidth = 1;
+        
         //ctx.translate(180, 180);
-        for (var i = -36; i < 36; i += 5/10) {
+        for (var i = -canvas.width/2 - $('#graph-offset-xr').value; i < canvas.width/2 - $('#graph-offset-xr').value; i += 5/10) {
+          let width = 1;
           // The linear graph
           var xrt = i;
           var yrt = -solve(xrt, Number($('#xiv-input').value), false);
@@ -1047,12 +1502,19 @@
             yrt = -solve(Number($('#xiv-input').value), xrt, false);
             yrtNext = -solve(Number($('#xiv-input').value), xrtNext, false)
           }
-          // Division by zero in rational functions
-          if (yrtNext == -Infinity) yrtNext = -360;
-          if (yrt == Infinity) yrt = 360;
-          if (yrtNext == Infinity) yrtNext = 360;
-          if (yrt == -Infinity) yrt = -360;
-          ctx.beginPath();
+          // Vertical asymptotes
+          if (!isFinite(yrtNext) && yrtNext != undefined) {
+            var xrtMext = i + 1 / 10 ** Number($('#trace-round').value);
+            var yrtMext = -solve(xrtMext, Number($('#xiv-input').value), false);
+            yrtNext = (yrtMext > 0) ? -360 : 360;
+          }
+
+          if (!isFinite(yrt) && yrt != undefined) {
+            var xrtMext = i + 1 / 10 ** Number($('#trace-round').value);
+            var yrtMext = -solve(xrtMext, Number($('#xiv-input').value), false);
+            yrt = (yrtMext > 0) ? 360 : -360;
+          }
+          ctx.lineWidth = width;
           ctx.moveTo(scale * xrt, scale * yrt);
           ctx.lineTo(scale * xrtNext, scale * yrtNext);
           ctx.stroke();
@@ -1072,7 +1534,7 @@
 
 
       // Scientific Calculator
-      function tet(x,y) {
+      function tetOld(x,y) {
         if (y == 2) {
           return x ** y;
         }
@@ -1085,6 +1547,35 @@
           if (y == 0) {return 1;}
           return r;
         }
+      }
+      function tet(x, a, precision = 100) {
+        x = math.complex(x);
+        a = math.complex(a);
+
+        // Handle base cases
+        if (math.equal(a, 0)) return math.complex(1);
+        if (math.equal(a, 1)) return x;
+
+        // Use an approximation method:
+        // f_{n+1}(x) = x^f_n(x), start with initial guess
+        let z = math.complex(1); // initial guess
+
+        for (let i = 0; i < precision; i++) {
+          z = math.pow(x, z);
+          if (!z.isFinite()) break;
+        }
+
+        // If a is integer, we can iterate normally
+        if (math.isInteger(a.re) && a.im === 0 && a.re > 0) {
+          let result = x;
+          for (let i = 1; i < a.re; i++) {
+            result = math.pow(x, result);
+          }
+          return result;
+        }
+
+        // For fractional/complex heights, return fixed point approximation
+        return z;
       }
       function nrt(exp, num) {
         Math.pow(exp, 1/num);
@@ -1356,43 +1847,52 @@
       #scientific #resultFake::placeholder {
         color: red;
       }
+      #scientific table {
+        border-collapse: separate;
+        border-spacing: 6px;
+        word-wrap: break-word;
+      }
+
+      #scientific td {
+        text-align: center;
+      }
     </style>
     <script>
       document.addEventListener('DOMContentLoaded', function() {
-      const navItems = document.querySelectorAll('.nav-item');
-      const contentSections = document.querySelectorAll('.content-section');
-      
-      // Function to handle nav item clicks
-      function handleNavClick(event) {
-        const targetId = this.getAttribute('data-target');
+        const navItems = document.querySelectorAll('.nav-item');
+        const contentSections = document.querySelectorAll('.content-section');
         
-        // Hide all content sections
-        contentSections.forEach(section => {
-          section.classList.remove('active');
-        });
+        // Function to handle nav item clicks
+        function handleNavClick(event) {
+          const targetId = this.getAttribute('data-target');
+          
+          // Hide all content sections
+          contentSections.forEach(section => {
+            section.classList.remove('active');
+          });
+          
+          // Show the targeted section
+          document.querySelector(targetId).classList.add('active');
+          
+          // Reset all nav items
+          navItems.forEach(item => {
+            item.style.transform = 'translateY(0)';
+            item.style.background = 'transparent';
+          });
+          
+          // Style the clicked nav item
+          this.style.background = 'rgba(255,255,255,0.3)';
+          this.style.transform = 'translateY(-5px)';
+        }
         
-        // Show the targeted section
-        document.querySelector(targetId).classList.add('active');
-        
-        // Reset all nav items
+        // Add click event to each nav item
         navItems.forEach(item => {
-          item.style.transform = 'translateY(0)';
-          item.style.background = 'transparent';
+          item.addEventListener('click', handleNavClick);
         });
         
-        // Style the clicked nav item
-        this.style.background = 'rgba(255,255,255,0.3)';
-        this.style.transform = 'translateY(-5px)';
-      }
-      
-      // Add click event to each nav item
-      navItems.forEach(item => {
-        item.addEventListener('click', handleNavClick);
+        // Click the first nav item by default
+        document.querySelector('.nav-item').click();
       });
-      
-      // Click the first nav item by default
-      document.querySelector('.nav-item').click();
-    });
       
     </script>
   </body>
