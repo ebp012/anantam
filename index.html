@@ -49,14 +49,16 @@
             <tbody>
               <tr>
                 <td id='xiv-td' class='viewport-input'>
-                  x-iv: <input type='range' min='-36' max='36' value='0' step='1' id='xiv-input'/><br/>
-                  x-iv = <span id='xiv-value'>0</span><br/>
-                  <div class='graph-adv'>
-                    x-iv Min: <input type='number' value='-36' id='xiv-min-input'/><br/>
-                    x-iv Max: <input type='number' value='36' id='xiv-max-input'/><br/>
-                    x-iv Step: <input type='number' value='1' min='0' id='xiv-step-input'/><br/>
+                  <div id='xiv-td-content'>
+                    x-iv: <input type='range' min='-36' max='36' value='0' step='1' id='xiv-input'/><br/>
+                    x-iv = <span id='xiv-value'>0</span><br/>
+                    <div class='graph-adv'>
+                      x-iv Min: <input type='number' value='-36' id='xiv-min-input'/><br/>
+                      x-iv Max: <input type='number' value='36' id='xiv-max-input'/><br/>
+                      x-iv Step: <input type='number' value='1' min='0' id='xiv-step-input'/><br/>
+                    </div>
+                    <input type='checkbox' id='xiv-type-input' checked='checked'/> <label for='xiv-type-input'>Slider input?</label>
                   </div>
-                  <input type='checkbox' id='xiv-type-input' checked='checked'/> <label for='xiv-type-input'>Slider input?</label>
                 </td>
                 <td id='xr-td'>
                   x-r: <input type='range' min='-36' max='36' value='0' step='1' id='xr-input'/><br/>
@@ -81,10 +83,14 @@
                 <td rowspan='2'>
                   <center>
                     Minor step: <input id='graph-minor-step' type='number' min='0' step='0.5' value='1' title='distance between thinner gridlines. set to 0 to disable them entirely.'/><br/>
-                    Major step: <input id='graph-major-step' type='number' min='0' value='6' title='distance between thicker gridlines. set to 0 to disable them entirely.'/><br/>
-                    xr-offset: <input id='graph-offset-xr' type='number' step='1' value='0'/><br/>
-                    yr-offset: <input id='graph-offset-yr' type='number' step='1' value='0'/><br/>
-                    yi-offset: <input id='graph-offset-yi' type='number' step='1' value='0'/><br/>
+                    Major step: <input id='graph-major-step' type='number' min='0' value='6' title='distance between thicker gridlines. set to 0 to disable them entirely.'/>
+                    <span id='graph-xryr-offset-div-container-span'>
+                      <div id='graph-xryr-offset-div'>
+                        xr-offset: <input id='graph-offset-xr' type='number' step='1' value='0'/><br/>
+                        yr-offset: <input id='graph-offset-yr' type='number' step='1' value='0'/><br/>
+                        yi-offset: <input id='graph-offset-yi' type='number' step='1' value='0'/>
+                      </div>
+                    </span>
                     <button id='graph-btn' onclick='graphFunction();'>Graph</button>
                     <div class='graph-adv'>
                       <hr/>
@@ -161,7 +167,7 @@
                     Round: 10<sup><input id='trace-round' type='number' style='font-size: calc(inherit * 0.25);' value='-3'/></sup>
                     <span id='graph-scale-span'>
                       <hr/>
-                      Scale: <input type='number' id='graph-scale' value='1' step='0.5'/>
+                      <span id='graph-scale-span-sub'>Scale: <input type='number' id='graph-scale' value='1' step='0.5'/></span>
                       <br/>
                     </span>
                     <!--Density: <input type='number' id='graph-density' value='10' step='1'/>-->
@@ -224,7 +230,8 @@
 
         window.addEventListener('load', function() {
           // Utiliser HTTP en lieu d'HTTPS à cause de l'HTTP est incompatible avec mon domain
-          if (window.location.href.slice(0, 5) !== 'http:') window.location.href = 'http://' + window.location.href.slice(8);
+          //if (window.location.href.slice(0, 5) !== 'http:') window.location.href = 'http://' + window.location.href.slice(8);
+
           document.querySelector('#homeTab').click();
           document.querySelectorAll('.graph-adv').forEach(function(element) {
               element.classList.add('hidden');
@@ -341,23 +348,38 @@
             var modal = $('#graph-fullscreen-modal');
             var container = $('#graph-container');
             var scaleContainer = $('#graph-scale-span-container');
+            var scaleContainerSub = $('#graph-scale-span-sub');
             if (fullscreen === false) {
               modal.innerHTML = '';
               modal.appendChild($('#graph-fullscreen-btn'));
               modal.appendChild($('#graph-div'));
               modal.appendChild($('#graph-scale-span'));
+              modal.appendChild($('#xiv-td-content'));
+              modal.appendChild($('#graph-xryr-offset-div'));
               document.body.style.overflowY = 'hidden';
               $('#graph-fullscreen-btn').innerHTML = '<i class="fa fa-compress"></i> Exit';
               canvas.style.transform = 'scale(' + this.value + ')';
+              scaleContainerSub.style.position = 'relative';
+              scaleContainerSub.style.bottom = '20px';
+              scaleContainerSub.style.left = 'calc(' + modal.parentElement.offsetWidth / 2 + ' - ' + scaleContainerSub.offsetWidth / 2 + 'px)';
             }
             else {
               container.appendChild($('#graph-fullscreen-btn'));
               container.appendChild($('#graph-div'));
               scaleContainer.appendChild($('#graph-scale-span'));
+              $('#xiv-td').appendChild($('#xiv-td-content'));
+              $('#graph-xryr-offset-div-container-span').appendChild($('#graph-xryr-offset-div'));
               document.body.style.overflowY = 'scroll';
               canvas.style.transform = 'scale(1)';
+              scaleContainerSub.style.position = 'static';
             }
             modal.classList.toggle('hidden');
+            scaleContainerSub.classList.toggle('modal');
+            scaleContainerSub.classList.toggle('free');
+            $('#xiv-td-content').classList.toggle('modal');
+            $('#xiv-td-content').classList.toggle('free');
+            $('#graph-xryr-offset-div').classList.toggle('modal');
+            $('#graph-xryr-offset-div').classList.toggle('free');
             modal.parentElement.classList.toggle('hidden');
             fullscreen = !fullscreen;
           });
@@ -373,10 +395,7 @@
             if (this.max > 2) this.max = 2;
             if (this.value <= this.min) this.value = this.min;
             if (this.value >= this.max) this.value = this.max;
-            if (fullscreen === true) {
-              canvas.style.transform = 'scale(' + $('#graph-scale').value + ')';
-              if (inputScale < prevValue) scaleContainer.transform = 'translateY(-10)';
-            }
+            if (fullscreen === true) canvas.style.transform = 'scale(' + $('#graph-scale').value + ')';
             else canvas.style.transform = 'scale(1)';
           });
 
