@@ -153,25 +153,657 @@
                   </center>
                 </td>
                 <td>
-                  <center>
+                  <center id='graph-scale-span-container'>
                     <strong>Trace</strong><br/>
                     x: <span id='xri-showcase'>? + ?i</span><br/>
                     y: <span id='yri-showcase'>? + ?i</span><br/>
                     <hr/>
                     Round: 10<sup><input id='trace-round' type='number' style='font-size: calc(inherit * 0.25);' value='-3'/></sup>
+                    <span id='graph-scale-span'>
+                      <hr/>
+                      Scale: <input type='number' id='graph-scale' value='1' step='0.5'/>
+                      <br/>
+                    </span>
+                    <!--Density: <input type='number' id='graph-density' value='10' step='1'/>-->
                   </center>
                 </td>
                 
               </tr>
             </tbody>
           </table>
-          <center>
+          <center id='graph-container'>
             <div id='graph-div'>
               <canvas height='360' width='360' style='border: 1px solid grey;' id='graph-canvas'></canvas>
             </div>
+            <button id='graph-fullscreen-btn'><i class='fa fa-expand'></i> Fullscreen</button>
           </center>
         </div>
       </div>
+
+        <!-- modal for the fullscreen graph (indented 1 extra) -->
+        <center>
+          <div class='modal-container hidden'>
+            <div id='graph-fullscreen-modal' class='modal hidden'>
+            </div>
+          </div>
+        </center>
+
+      <script>
+        // Axes and Trace Variables
+        var xr = 0, xrp = 0; // x real (x axis)
+        var xi = 0, xip = 0; // x imaginary (z axis)
+        var yr = 0, yrp = 0; // y real (y axis)
+        var yi = 0, yip = 0; // y imaginary (t axis)
+
+        var xiv = 0, xivp = 0; // x imaginary viewport
+        var inputs = ['xi', 'xr', 'xiv']; // each instance of the slider setup thing
+
+        var xrmin = -36, xrmax = 36; // x-real minimum/maximum
+        var ximin = -36, ximax = 36; // x-imaginary minimum/maximum
+
+        const scale = 5; // how zoomed in the graph is
+        var inputScale = 1;
+
+        var fullscreen = false; // est-on plein écran (fullscreen) ou non
+
+        // Convenience stuff
+        const $ = (selector) => document.querySelector(selector);
+
+        // Canvas Declaration
+        const canvas = document.getElementById('graph-canvas');
+        const ctx = canvas.getContext('2d');
+        var canvasWidth = 360;
+        var canvasHeight = 360;
+        ctx.translate(canvas.width/2, canvas.height/2);
+        var scalex = 5;
+        var scaley = 5;
+        var do3D = false;
+        var toffxr = 0; // total xr-offset
+        var toffyr = 0; // total yr-offset
+        var toffyi = 0; // total yi-offset
+
+        window.addEventListener('load', function() {
+          document.querySelector('#homeTab').click();
+          document.querySelectorAll('.graph-adv').forEach(function(element) {
+              element.classList.add('hidden');
+          });
+          setInterval(function() {
+            // Update whether graph is 2D or 3D
+            if ($('#graph-dimension-3d').checked == true) {
+              do3D = true;
+            }
+            else {
+              do3D = false;
+            }
+            // Update whether to show the graph button
+            if ($('#graph-auto').checked != true) {
+              $('#graph-btn').style.display = 'block';
+            }
+            else {
+              $('#graph-btn').style.display = 'none';
+            }
+
+            // Continuously (every 37 ms) check for changes in xr,xi,yr,yi and push to span
+            var textx = '', texty = '';
+            // Mirror the value of x
+            if (xr != 0) {
+              textx += xr.toString();
+            }
+            if (xi != 0) {
+              textx += ' ';
+              if (xi < 0) {
+                textx += '- ' + ((-1) * xi).toString() + '<i>i</i>';
+              }
+              else if (xi > 0) {
+                if (xr != 0) textx += '+ '
+                textx += xi.toString() + '<i>i</i>';
+              }
+              else {
+                //textx += ' ± ?i'
+              }
+            }
+            if (xr == 0 && xi == 0) textx = '0'
+
+            // Solve for y and then store it
+            yr = solve(xr, xi, false);
+            yi = solve(xr, xi, true);
+
+            // Display the value of y
+            if (yr != 0) {
+              texty += yr.toString();
+            }
+            if (yr != 0) {
+              texty += ' ';
+              if (yi < 0) {
+                texty += '- ' + ((-1) * yi).toString() + '<i>i</i>';
+              }
+              else if (yi > 0) {
+                if (yr != 0) texty += '+ '
+                texty += yi.toString() + '<i>i</i>';
+              }
+              else {
+                //texty += ' ± ?i'
+              }
+            }
+            if (yr == 0 && yi == 0) texty = '0'
+            
+            $('#xri-showcase').innerHTML = textx;
+            $('#yri-showcase').innerHTML = texty;
+
+            // if the user selects to graph automatically (resource-consuming)
+            if ($('#graph-auto').checked == true) {
+              graphFunction();
+            }
+          }, 37);
+
+          $('#graphing').addEventListener('mouseover', function () {
+            if (pregraphed == false) pregraphed = true;
+            graphFunction();
+          });
+
+          $('#xi-input').addEventListener('input', function () {
+            xi = Number(this.value);
+            $('#xi-value').innerHTML = xi
+            
+          });
+
+          $('#xr-input').addEventListener('input', function () {
+            xr = Number(this.value);
+            $('#xr-value').innerHTML = xr;
+          });
+
+          $('#xiv-input').addEventListener('input', function () {
+            xiv = Number(this.value);
+            $('#xiv-value').innerHTML = xiv;
+          });
+
+          $('#graph-minor-step').addEventListener('input', function () {
+            $('#graph-major-step').step = this.value;
+          });
+
+          $('#graph-offset-xr').addEventListener('input', function () {
+            toffxr = Number(this.value);
+            resetOffset();
+            ctx.translate(toffxr, 0);
+            graphFunction();
+          });
+
+          $('#graph-offset-yr').addEventListener('input', function () {
+            toffyr = Number(this.value);
+            resetOffset();
+            ctx.translate(0, toffyr);
+            graphFunction();
+          });
+
+          $('#graph-fullscreen-btn').addEventListener('click', function () {
+            var modal = $('#graph-fullscreen-modal');
+            var container = $('#graph-container');
+            var scaleContainer = $('#graph-scale-span-container');
+            if (fullscreen === false) {
+              modal.innerHTML = '';
+              modal.appendChild($('#graph-fullscreen-btn'));
+              modal.appendChild($('#graph-div'));
+              modal.appendChild($('#graph-scale-span'));
+              document.body.style.overflowY = 'hidden';
+              $('#graph-fullscreen-btn').innerHTML = '<i class="fa fa-compress"></i> Exit';
+              canvas.style.transform = 'scale(' + this.value + ')';
+            }
+            else {
+              container.appendChild($('#graph-fullscreen-btn'));
+              container.appendChild($('#graph-div'));
+              scaleContainer.appendChild($('#graph-scale-span'));
+              document.body.style.overflowY = 'scroll';
+              canvas.style.transform = 'scale(1)';
+            }
+            modal.classList.toggle('hidden');
+            modal.parentElement.classList.toggle('hidden');
+            fullscreen = !fullscreen;
+          });
+
+          $('#graph-scale').addEventListener('input', function () {
+            var modal = $('#graph-fullscreen-modal');
+            var scaleContainer = $('#graph-scale-span-container');
+            var prevValue = inputScale;
+            inputScale = this.value;
+            this.max =  round(modal.offsetWidth ** 2, 1);
+            this.min = round(1 / $('#graph-scale').max, 1);
+            if (this.min < 0) this.min = 0;
+            if (this.max > 2) this.max = 2;
+            if (this.value <= this.min) this.value = this.min;
+            if (this.value >= this.max) this.value = this.max;
+            if (fullscreen === true) {
+              canvas.style.transform = 'scale(' + $('#graph-scale').value + ')';
+              if (inputScale < prevValue) scaleContainer.transform = 'translateY(-10)';
+            }
+            else canvas.style.transform = 'scale(1)';
+          });
+
+          canvas.addEventListener('mousewheel', function (e) {
+            e.preventDefault();
+            // Vertical scrolling
+            if (event.deltaY > 0) {
+              // Scroll down; ideally decrease y-i viewport
+              xiv -= Number($('#xiv-step-input').value);
+              if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
+              $('#xiv-input').value = xiv;
+              $('#xiv-value').innerHTML = xiv;
+            }
+            else if (event.deltaY < 0) {
+              // Scroll up; ideally increase y-i viewport
+              xiv += Number($('#xiv-step-input').value);
+              if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
+              $('#xiv-input').value = xiv;
+              $('#xiv-value').innerHTML = xiv;
+            }
+            // Horizontal scrolling
+            if (event.deltaX > 0) {
+              // Scroll left; decrease x-i viewport
+              xiv -= Number($('#xiv-step-input').value);
+              if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
+              $('#xiv-input').value = xiv;
+              $('#xiv-value').innerHTML = xiv;
+            }
+            else if (event.deltaX < 0) {
+              // Scroll right; increase x-i viewport
+              xiv += Number($('#xiv-step-input').value);
+              if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
+              $('#xiv-input').value = xiv;
+              $('#xiv-value').innerHTML = xiv;
+            }
+            graphFunction();
+          });
+
+          $('#xiv-td').addEventListener('mousewheel', function (e) {
+            // Horizontal scrolling
+            if (event.deltaX > 0) {
+              // Scroll left
+              xiv -= Number($('#xiv-step-input').value);
+              if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
+              $('#xiv-input').value = xiv;
+              $('#xiv-value').innerHTML = xiv;
+            }
+            else if (event.deltaX < 0) {
+              // Scroll right
+              xiv += Number($('#xiv-step-input').value);
+              if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
+              $('#xiv-input').value = xiv;
+              $('#xiv-value').innerHTML = xiv;
+            }
+            graphFunction();
+          });
+
+          $('#xr-td').addEventListener('mousewheel', function (e) {
+            // Horizontal scrolling
+            if (event.deltaX > 0) {
+              // Scroll left
+              xr -= Number($('#xr-step-input').value);
+              if (xr <= $('#xr-min-input').value) xr = Number($('#xr-min-input').value);
+              $('#xr-input').value = xr;
+              $('#xr-value').innerHTML = xr;
+            }
+            else if (event.deltaX < 0) {
+              // Scroll right
+              xr += Number($('#xr-step-input').value);
+              if (xr >= $('#xr-max-input').value) xr = Number($('#xr-max-input').value);
+              $('#xr-input').value = xr;
+              $('#xr-value').innerHTML = xr;
+            }
+            graphFunction();
+          });
+
+          $('#xi-td').addEventListener('mousewheel', function (e) {
+            // Horizontal scrolling
+            if (event.deltaX > 0) {
+              // Scroll left
+              xi -= Number($('#xi-step-input').value);
+              if (xi <= $('#xi-min-input').value) xi = Number($('#xi-min-input').value);
+              $('#xi-input').value = xi;
+              $('#xi-value').innerHTML = xi;
+            }
+            else if (event.deltaX < 0) {
+              // Scroll right
+              xi += Number($('#xi-step-input').value);
+              if (xi >= $('#xi-max-input').value) xi = Number($('#xi-max-input').value);
+              $('#xi-input').value = xi;
+              $('#xi-value').innerHTML = xi;
+            }
+            graphFunction();
+          });
+
+          $('#graph-advanced').addEventListener('input', function () {
+            const graphAdvElements = document.querySelectorAll('.graph-adv');
+            
+            if (!this.checked) {
+                graphAdvElements.forEach(function(element) {
+                    element.classList.add('hidden');
+                });
+            } else {
+                graphAdvElements.forEach(function(element) {
+                    element.classList.remove('hidden');
+                });
+            }
+        });
+
+          function resetOffset () {
+            ctx.translate(-toffxr, -toffyr);
+          }
+
+          function inputSetup (prefix) {
+            // Change xi minimum
+            $('#' + prefix + '-min-input').addEventListener('input', function () {
+              $('#' + prefix + '-input').min = Number($('#' + prefix + '-min-input').value);
+              $('#' + prefix + '-max-input').min = $('#' + prefix + '-input').min;
+            });
+
+            // Change xi maximum
+            $('#' + prefix + '-max-input').addEventListener('input', function () {
+              $('#' + prefix + '-input').max = Number($('#' + prefix + '-max-input').value);
+              $('#' + prefix + '-min-input').max = $('#' + prefix + '-input').max;
+            });
+
+            // Change xi step
+            $('#' + prefix + '-step-input').addEventListener('input', function () {
+              $('#' + prefix + '-input').step = Number($('#' + prefix + '-step-input').value);
+            });
+
+            // Change xi input type
+            $('#' + prefix + '-type-input').addEventListener('input', function () {
+              if ($('#' + prefix + '-type-input').checked != true && $('#' + prefix + '-type-input').checked != 'checked') {
+                $('#' + prefix + '-input').type = 'number';
+                $('#' + prefix + '-input').removeAttribute('min');
+                $('#' + prefix + '-input').removeAttribute('max');
+                $('#' + prefix + '-min-input').disabled = 'disabled';
+                $('#' + prefix + '-max-input').disabled = 'disabled';
+              }
+              else {
+                $('#' + prefix + '-input').type = 'range';
+                $('#' + prefix + '-min-input').removeAttribute('disabled');
+                $('#' + prefix + '-max-input').removeAttribute('disabled');
+                if (Number($('#' + prefix + '-input').value) > Number($('#' + prefix + '-max-input').value)) {
+                  $('#' + prefix + '-max-input').value = $('#' + prefix + '-input').value;
+                }
+                if (Number($('#' + prefix + '-input').value) < Number($('#' + prefix + '-min-input').value)) {
+                  $('#' + prefix + '-min-input').value = $('#' + prefix + '-input').value;
+                }
+                
+                $('#' + prefix + '-input').max = Number($('#' + prefix + '-max-input').value);
+                $('#' + prefix + '-input').min = Number($('#' + prefix + '-min-input').value);
+              }
+            });
+          }
+          for (var i = 0; i < inputs.length; i++) {
+            inputSetup(inputs[i]);
+          }
+          //drawGrid(6, 1);
+        });
+
+        function drawGrid (majorStep, minorStep) {
+          var mS;
+          if (minorStep != undefined) {
+            mS = minorStep;
+          }
+          else {
+            mS = 1;
+          }
+          //ctx.translate(0, 0);
+          // Draw the x and y axes
+          // xr-axis
+          ctx.beginPath();
+          ctx.moveTo(-canvas.width, 0);
+          ctx.lineTo(canvas.width, 0);
+          ctx.strokeStyle = 'blue';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // yr-axis
+          ctx.beginPath();
+          ctx.moveTo(0, -canvas.height);
+          ctx.lineTo(0, canvas.height);
+          ctx.strokeStyle = 'red';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+
+          // Draw all of the gridlines
+          for (var i = -canvas.height/2; i < canvas.height/2; i += 5) {
+            ctx.strokeStyle = 'grey';
+            // Determine whether to do major or minor lines
+            if ((i/5) % majorStep == 0) {
+              ctx.lineWidth = 0.25;
+            }
+            else if ((i/5) % mS == 0) {
+              ctx.lineWidth = 0.125;
+            }
+            else {
+              ctx.lineWidth = 0.03125;
+            }
+            if ($('#graph-grids').checked == true) {
+              // Draw quadrants I and IV
+              // Vertical
+              ctx.beginPath();
+              ctx.moveTo(i, -canvas.height);
+              ctx.lineTo(i, canvas.height);
+              ctx.stroke();
+              // Horizontal
+              ctx.beginPath();
+              ctx.moveTo(-canvas.width, i);
+              ctx.lineTo(canvas.width, i);
+              ctx.stroke();
+              // Draw quadrants II and III
+              // Vertical
+              ctx.beginPath();
+              ctx.moveTo(-1 * i, -canvas.height);
+              ctx.lineTo(-1 * i, canvas.height);
+              ctx.stroke();
+              // Horizontal
+              ctx.beginPath();
+              ctx.moveTo(-canvas.width, i);
+              ctx.lineTo(canvas.width, i);
+              ctx.stroke();
+            }
+            // Draw tick marks if selected
+            if ($('#graph-ticks').checked == true) {
+              // Number($('#graph-tick-height').value)
+              ctx.lineWidth = 0.5;
+              // Draw quadrants I and IV
+              // Vertical
+              ctx.strokeStyle = 'blue';
+              ctx.beginPath();
+              ctx.moveTo(i, -Number($('#graph-tick-height').value));
+              ctx.lineTo(i, Number($('#graph-tick-height').value));
+              ctx.stroke();
+              // Horizontal
+              ctx.strokeStyle = 'red';
+              ctx.beginPath();
+              ctx.moveTo(-Number($('#graph-tick-height').value), i);
+              ctx.lineTo(Number($('#graph-tick-height').value), i);
+              ctx.stroke();
+              // Draw quadrants II and III
+              // Vertical
+              ctx.strokeStyle = 'blue';
+              ctx.beginPath();
+              ctx.moveTo(-1 * i, -Number($('#graph-tick-height').value));
+              ctx.lineTo(-1 * i, Number($('#graph-tick-height').value));
+              ctx.stroke();
+              // Horizontal
+              ctx.strokeStyle = 'red';
+              ctx.beginPath();
+              ctx.moveTo(-Number($('#graph-tick-height').value), i);
+              ctx.lineTo(Number($('#graph-tick-height').value), i);
+              ctx.stroke();
+            }
+          }
+        }
+
+        function drawGrid3D () {
+          // yi-axis
+          ctx.beginPath();
+          ctx.moveTo(canvas.height/2, canvas.height/4);
+          ctx.lineTo(-canvas.height/2, -canvas.height/4);
+          ctx.lineWidth = 1.75;
+          ctx.strokeStyle = 'green';
+          ctx.stroke();
+          // c2 = sqrt(a2 + b2)
+          const iidiag = Math.sqrt(180**2 + 90**2);
+          const iictick = iidiag / 180; // iidiag's calculatory tick
+          // make a triangle mathematically similar to iidiag's
+          // hypotenuse = iictick
+          // find legs (vertical a and horizontal 2a)
+          // sqrt(a2 + 4a2) = iictick
+          // a^2 + 4a^2 = iictick^2
+          // 5a^2 = iictick^2
+          // 5a = iictick
+          // a = iictick/5
+          const a = (iictick * Math.sqrt(5))/5;
+          // i is the x position; j is the y position
+          var j = 90;
+          var k = 0;
+          for (var i = -canvas.width/2; i < iidiag; i += (2*a)) {
+            if ($('#graph-ticks').checked == true) {
+              ctx.beginPath()
+              if (k % 6 == 0) {
+                ctx.moveTo(i, -j + Number($('#graph-tick-height').value));
+                ctx.lineTo(i, -j - Number($('#graph-tick-height').value));
+                //ctx.lineTo(i + (2*a), j - a);
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+              }
+            }
+            j -= a;
+            k ++;
+          }
+          /*for (var i = -canvas.width/2; i < 180; i += (2 * a)) {
+            ctx.beginPath();
+            ctx.moveTo(i, -5);
+            ctx.lineTo(i + 2 * a, a+5);
+            ctx.stroke();
+          }*/
+        }
+
+        // Round numbers
+        function round (num, p=0) {
+          if (num == undefined) {
+            return 0;
+          }
+          else {
+            return Math.round(num * 10 ** -p) / 10 ** -p;
+          }
+        }
+        // Solve the function for some X
+        function solve2D (x) {
+          // solve y = x^2/9 + x - 1
+          let func2D = (0.037) * x ** 2 + x - 10; //eval($('#function-input').value);
+          return round(func2D, Number($('#trace-round').value));
+        }
+        function countOccurrences(str, search) {
+          return str.split(search).length - 1;
+        }
+        function solve (x, i, solveComplex, whence) {
+          if (whence == undefined) whence = 1;
+          // Read the function input
+          let scope = {
+            x: math.complex(x, i),
+            tet: tet,
+          };
+          var functext = $('#function-input').value.toString();
+          functext = functext.replace(/([\d\w\)\.]+)\s*\^\^\s*([\d\w\(\)\.]+)/g, 'tet($1,$2)'); // Tetration
+          functext = functext.replace('{','(').replace('}', ')'); // Minimal LaTeX cross-compatibility
+          functext = functext.replace(/\|([^|]+)\|/g, 'abs($1)'); // Absolute value
+          // Constant Functions
+          if (countOccurrences(functext, 'x') == 0) functext = '(' + functext + ')x^0';
+          // Finalise the function
+          let func = math.evaluate(1 + '(' + functext + ')', scope);
+          if (solveComplex == false || solveComplex == undefined) {
+            return round(func.re, Number($('#trace-round').value));
+          }
+          else {
+            var a = round(func.im, Number($('#trace-round').value));
+            return round(func.im, Number($('#trace-round').value));
+          }
+        }
+        function isHole(num) {
+          if (num == undefined || num == NaN || num == Infinity || num == -Infinity || num == null) return true;
+          else return false;
+        }
+
+        function graphFunction () {
+          var roc = false;
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.translate(canvas.width/2 + 5 * toffxr, canvas.height/2 + 5 * toffyr);
+          drawGrid(Number($('#graph-major-step').value), Number($('#graph-minor-step').value));
+          if (do3D == true) drawGrid3D();
+          ctx.strokeStyle = $('#function-colour').value;
+          
+          //ctx.translate(180, 180);
+          for (var i = -canvas.width/2 - $('#graph-offset-xr').value; i < canvas.width/2 - $('#graph-offset-xr').value; i += 5/10) {
+            let width = 1;
+            // The linear graph
+            var xrt = i;
+            var yrt = -solve(xrt, Number($('#xiv-input').value), false);
+            var xrtNext = i + 5/10;
+            var yrtNext = -solve(xrtNext, Number($('#xiv-input').value), false);
+            if ($('#graph-dimension-xi').checked == true) {
+              yrt = -solve(Number($('#xiv-input').value), xrt, false);
+              yrtNext = -solve(Number($('#xiv-input').value), xrtNext, false)
+            }
+            // Holes ( test and try (x-1)(x+1)/(x-1) )
+            /*if (isHole(yrtNext) == true|| isHole(yrt) == true) {
+              var xrtMext = i + 1 / 10 ** Number($('#trace-round').value);
+              var yrtMext = -solve(xrtMext, Number($('#xiv-input').value), false);
+              
+              if (isHole(yrtNext) == true) {
+                yrtNext = (yrtMext != undefined) ? yrtMext: 0;
+              }
+              if (isHole(yrt) == true) {
+                yrt = (yrtMext != undefined) ? yrtMext: 0;
+                ctx.beginPath();
+                ctx.arc(scale * xrt, scale * yrt, 2, 0, 2 * Math.PI);
+                ctx.fillStyle = $('#function-colour').value;
+                ctx.fill();
+                ctx.lineWidth = 0;
+                ctx.stroke();
+              }
+            }*/
+            // Vertical asymptotes
+            if (!isFinite(yrtNext) && yrtNext != undefined) {
+              var xrtMext = i + 1 / 10 ** Number($('#trace-round').value);
+              var yrtMext = -solve(xrtMext, Number($('#xiv-input').value), false);
+              yrtNext = (yrtMext > 0) ? -360 : 360;
+            }
+
+            else if (!isFinite(yrt) && yrt != undefined) {
+              var xrtMext = i + 1 / 10 ** Number($('#trace-round').value);
+              var yrtMext = -solve(xrtMext, Number($('#xiv-input').value), false);
+              yrt = (yrtMext > 0) ? 360 : -360;
+            }
+            ctx.lineWidth = width;
+            ctx.moveTo(scale * xrt, scale * yrt);
+            ctx.lineTo(scale * xrtNext, scale * yrtNext);
+            ctx.stroke();
+            // The pointed graph
+            if (i % Number($('#graph-major-step').value) == 0 && $('#graph-points').checked == true) {
+              // Positive x point
+              ctx.beginPath();
+              ctx.arc(scale * xrt, scale * yrt, 1.25, 0, 2 * Math.PI);
+              ctx.fillStyle = $('#function-colour').value;
+              ctx.fill();
+              ctx.lineWidth = 0;
+              ctx.stroke();
+              // Negative x point
+              var xrtNeg = -i;
+              var yrtNeg = -solve(xrtNeg, Number($('#xiv-input').value), false);
+              ctx.beginPath();
+              ctx.arc(scale * xrtNeg, scale * yrtNeg, 1.25, 0, 2 * Math.PI);
+              ctx.fillStyle = $('#function-colour').value;
+              ctx.fill();
+              ctx.lineWidth = 0;
+              ctx.stroke();
+            }
+          }
+        }
+      </script>
+
+      <!-- Scientific Calculator -->
       <div id='scientific' class='content-section'>
         <h1 class="page-title">Scientific</h1>
         <div class="desk-paper" style='line-height: 36pt;'>
@@ -510,6 +1142,26 @@
                       <option value='gy-d'>Light galactic year (lgy)</option>
                     </optgroup>
                   </select>
+                  <select id='conv-time-first'>
+                    <optgroup label='Ubiquitous'>
+                      <option value='s'><i>Second (s or sec)</i></option>
+                    </optgroup>
+                    <optgroup label='Imperial'>
+                      <option value='fth'><i>Fourth (fth)</i></option>
+                      <option value='thd'><i>Third (thd)</i></option>
+                      <option value='min'><i>Minute (min)</i></option>
+                      <option value='hr'><i>Hour (hr)</i></option>
+                      <option value='d'><i>Day (d)</i></option>
+                      <option value='w'><i>Week (w)</i></option>
+                      <option value='lm'><i>Lunar Month (lm)</i></option>
+                      <option value='ifcm'><i>International Fixed Calendar Month (IFCM)</i></option>
+                      <option value='agm'><i>Average Gregorian Month (AGM)</i></option>
+                      <option value='yr'><i>Julian year (y)</i></option>
+                      <option value='lyr'><i>Lunar year (lyr)</i></option>
+                      <option value='oyr'><i>Orbital year (oyr)</i></option>
+                      <option value='gyr'><i>Galactic year (gyr)</i></option>
+                    </optgroup>
+                  </select>
                   <br/>
                   <input type='number' id='conv-length-input' value='1'/>
                 </td>
@@ -579,17 +1231,6 @@
                       <option value='pl'>Planck length (pl)</option>
                       <option value='aparsec'>Attoparsec</option>
                       <option value='smoot'>Smoot</option>
-                      <option value='s-d'>Light second (ls)</option>
-                      <option value='min-d'>Light minute (lmin)</option>
-                      <option value='hr-d'>Light hour (lhr)</option>
-                      <option value='d-d'>Light day (ld)</option>
-                      <option value='w-d'>Light week (lw)</option>
-                      <option value='fn-d'>Light fortnight (lfn)</option>
-                      <option value='lm-d'>Light lunar month (llm)</option>
-                      <option value='jjy-d'>Light Julian year (lJy)</option>
-                      <option value='ly-d'>Light lunar year (lly)</option>
-                      <option value='oy-d'>Light orbital year (loy)</option>
-                      <option value='gy-d'>Light galactic year (lgy)</option>
                     </optgroup>
                   </select>
                   <br/>
@@ -671,35 +1312,63 @@
               'parsec': 3.08567758e18 * 39.37,
               'ly': 9.461e15 * 39.37,
               'au': 1.496e11 * 39.37,
-              's-d': (1/299792458) * 39.37,
-              'min-d': 60 * (1/299792458) * 39.37,
-              'hr-d': 60 * 60 * (1/299792458) * 39.37,
-              'd-d': 24 * 60 * 60 * (1/299792458) * 39.37,
-              'w-d': 7 * 24 * 60 * 60 * (1/299792458) * 39.37,
-              'fn-d': 14 * 24 * 60 * 60 * (1/299792458) * 39.37,
-              'lm-d': 29.5 * 24 * 60 * 60 * (1/299792458) * 39.37,
-              'jjy-d': 365 * 24 * 60 * 60 * (1/299792458) * 39.37,
-              'ly-d': 29.5 * 12 * 24 * 60 * 60 * (1/299792458) * 39.37,
-              'oy-d': 365.2471 * 24 * 60 * 60 * (1/299792458) * 39.37,
-              'gy-d': 225 * 10 ** 6 * 365.2471 * 24 * 60 * 60 * (1/299792458) * 39.37,
             };
+            const timeFactors = {
+              // --- Seconds ---
+              's': 1,
+              
+              // --- Imperial --
+              'fth': 1/3600,
+              'thd': 1/60,
+              'min': 60,
+              'hr': 3600,
+              'd': 86400,
+              'w': 86400 * 7,
+              'lm': 86400 * 29.5, // Lunar month
+              'ifcm': 86400 * 28, // International Fixed Calendar month
+              'agm': 86400 * 30.3375, // Average Gregorian month
+              'yr': 86400 * 365,
+              'lyr': 86400 * 29.5 * 12,
+              'oyr': 86400 * 365.2422,
+              'gyr': 86400 * 365 * 2.2e8,
+
+              // --- Metric ---
+            }
 
             document.getElementById('conv-length-btn').addEventListener('click', function () {
               const conversion = document.getElementById('conv-unit-type').value;
               const fromUnit = document.getElementById('conv-length-first').value;
               const toUnit = document.getElementById('conv-length-second').value;
-              const input = parseFloat(document.getElementById('conv-length-input').value);
+              switch (conversion) {
+                case 'length':
+                  const input = parseFloat(document.getElementById('conv-length-input').value);
 
-              if (isNaN(input)) {
-                alert('Please enter a valid number');
-                return;
+                  if (isNaN(input)) {
+                    alert('Please enter a valid number');
+                    return;
+                  }
+                  const inches = input * (lengthFactors[fromUnit] || 1);
+                  const converted = inches / (lengthFactors[toUnit] || 1);
+
+                  document.getElementById('conv-length-output').value = converted;
+                  $('#conv-length-input').style.color = 'black';
+                  $('#conv-length-output').style.color = 'black';
+                  break;
+                case 'time':
+                  const input = parseFloat(document.getElementById('conv-length-input').value);
+
+                  if (isNaN(input)) {
+                    alert('Please enter a valid number');
+                    return;
+                  }
+                  const seconds = input * (timeFactors[fromUnit] || 1);
+                  const converted = seconds / (timeFactors[toUnit] || 1);
+
+                  document.getElementById('conv-length-output').value = converted;
+                  $('#conv-length-input').style.color = 'black';
+                  $('#conv-length-output').style.color = 'black';
+                  break;
               }
-              const inches = input * (lengthFactors[fromUnit] || 1);
-              const converted = inches / (lengthFactors[toUnit] || 1);
-
-              document.getElementById('conv-length-output').value = converted;
-              $('#conv-length-input').style.color = 'black';
-              $('#conv-length-output').style.color = 'black';
             });
 
             // Flip button
@@ -728,20 +1397,20 @@
       <div id='chemistry' class='content-section active'>
         <h1 class="page-title">Chemistry</h1>
         <div class="desk-paper" style='line-height: 36pt;'>
-          <input type='number' oninput='showElement(this.value)'/>
           <h2>Chemical Element Information</h2>
           <table class='non'>
             <thead>
               <tr>
-                <td colspan='2'>Property</td>
-                <td>Value</td>
+                <td colspan='2' style='width: 50%;'>Property</td>
+                <td style='width: 50%;'>Value</td>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td rowspan='6'><strong>Nomenclature</strong></td>
+                <td rowspan='7'><strong>Nomenclature</strong></td>
                 <td><strong>Atomic Number</strong></td>
-                <td id='atom-num'>?</td>
+                <td><input type='number' oninput='showElement(this.value)' style='max-width: 100%; width: 100%; text-align: center;' min='-174' max='174' id='atom-num'/></td>
+                <!--<td id='atom-num'>?</td>-->
               </tr>
               <tr>
                 <td><strong>Element Name</strong></td>
@@ -753,7 +1422,7 @@
               </tr>
               <tr>
                 <td><strong>Element Symbol</strong></td>
-                <td id='atom-name'>?</td>
+                <td id='atom-symbol'>?</td>
               </tr>
               <tr>
                 <td><strong>Element Coordinate</strong></td>
@@ -813,146 +1482,247 @@
           </table>
         </div>
         <script>
-          const elementRoots = [
-            [0, 'neutronium', 'neutride', 'Nu'],
-            [1, 'hydrogen', 'hydride', 'H'],
-            [2, 'helium', 'helide', 'He'],
-            [3, 'lithium', 'lithide', 'Li'],
-            [4, 'beryllium', 'beryllide', 'Be'],
-            [5, 'boron', 'boride', 'B'],
-            [6, 'carbon', 'carbide', 'C'],
-            [7, 'nitrogen', 'nitride', 'N'],
-            [8, 'oxygen', 'oxide', 'O'],
-            [9, 'fluorine', 'fluoride', 'F'],
-            [10, 'neon', 'neide', 'Ne'],
-            [11, 'sodium', 'sodide', 'Na'],
-            [12, 'magnesium', 'magneside', 'Mg'],
-            [13, 'aluminium', 'alumide', 'Al'],
-            [14, 'silicon', 'silicide', 'Si'],
-            [15, 'phosphorous', 'phosphide', 'P'],
-            [16, 'sulphur', 'sulphide', 'S'],
-            [17, 'chlorine', 'chloride', 'Cl'],
-            [18, 'argon', 'argide', 'Ar'],
-            [19, 'potassium', 'potasside', 'K'],
-            [20, 'calcium', 'calcide', 'Ca'],
-            [21, 'scandium', 'scandide', 'Sc'],
-            [22, 'titanium', 'titanide', 'Ti'],
-            [23, 'vanadium', 'vanadide', 'V'],
-            [24, 'chromium', 'chromide', 'Cr'],
-            [25, 'manganese', 'manganide', 'Ma'],
-            [26, 'iron', 'ferride', 'Fe'],
-            [27, 'cobalt', 'cobaltide', 'Co'],
-            [28, 'nickel', 'nickelide', 'Ni'],
-            [29, 'copper', 'cupride', 'Cu'],
-            [30, 'zinc', 'zincide', 'Zn'],
-            [31, 'gallium', 'gallide', 'Ga'],
-            [32, 'germanium', 'germanide', 'Ge'],
-            [33, 'arsenic', 'arsenide', 'As'],
-            [34, 'selenium', 'selenide', 'Se'],
-            [35, 'bromine', 'bromide', 'Br'],
-            [36, 'krypton', 'kryptide', 'Kr'],
-            [37, 'rubidium', 'rubide'],
-            [38, 'strontium', 'strontide'],
-            [39, 'yttrium', 'yttride'],
-            [40, 'zirconium', 'zirconide'],
-            [41, 'niobium', 'niobide'],
-            [42, 'molybdenum', 'molybdenide'],
-            [43, 'technetium', 'technetide'],
-            [44, 'ruthenium', 'ruthenide'],
-            [45, 'rhodium', 'rhodide'],
-            [46, 'palladium', 'palladide'],
-            [47, 'silver', 'argentide'],
-            [48, 'cadmium', 'cadmide'],
-            [49, 'indium', 'indide'],
-            [50, 'tin', 'stannide'],
-            [51, 'antimony', 'stibide'],
-            [52, 'tellurium', 'telluride'],
-            [53, 'iodine', 'iodide'],
-            [54, 'xenon', 'xenide'],
-            [55, 'caesium', 'caeside'],
-            [56, 'barium', 'baride'],
-            [57, 'lanthanum', 'lanthanide'],
-            [58, 'cerium', 'cereide'],
-            [59, 'praseodymium', 'praseodymide'],
-            [60, 'neodymium', 'neodymide'],
-            [61, 'promethium', 'promethide'],
-            [62, 'samarium', 'samaride'],
-            [63, 'europium', 'europium'],
-            [64, 'gadolinium', 'gadolinide'],
-            [65, 'terbium', 'terbide'],
-            [66, 'dysprosium', 'dysproside'],
-            [67, 'holmium', 'holmide'],
-            [68, 'erbium', 'erbide'],
-            [69, 'thulium', 'thulide'],
-            [70, 'ytterbium', 'ytterbide'],
-            [71, 'lutetium', 'lutetide'],
-            [72, 'hafnium', 'hafnide'],
-            [73, 'tantalum', 'tantalide'],
-            [74, 'tungsten', 'wolframide'],
-            [75, 'rhenium', 'rhenide'],
-            [76, 'osmium', 'osmide'],
-            [77, 'iridium', 'iridide'],
-            [78, 'platinum', 'platinide'],
-            [79, 'gold', 'auride'],
-            [80, 'mercury', 'hydragyride'],
-            [81, 'thallium', 'thallide'],
-            [82, 'lead', 'plumbide'],
-            [83, 'bismuth', 'bismide'],
-            [84, 'polonium', 'polonide'],
-            [85, 'astatine', 'astatide'],
-            [86, 'radon', 'randide'],
-            [87, 'francium', 'francide'],
-            [88, 'radium', 'radide'],
-            [89, 'actinium', 'actinide'],
-            [90, 'thorium', 'thoride'],
-            [91, 'protractinium', 'protractinide'],
-            [92, 'uranium', 'uranide'],
-            [93, 'neptunium', 'neptunide'],
-            [94, 'plutonium', 'plutonide'],
-            [95, 'americium', 'americide'],
-            [96, 'curium', 'curide'],
-            [97, 'berkelium', 'berkelide'],
-            [98, 'californium', 'californide'],
-            [99, 'einsteinium', 'einsteinide'],
-            [100, 'fermium', 'fermide'],
-            [101, 'mendelevium', 'mendelevide'],
-            [102, 'nobelium', 'nobelide'],
-            [103, 'lawrencium', 'lawrencide'],
-            [104, 'rutherfordium', 'rutherfordide'],
-            [105, 'dubnium', 'dubnide'],
-            [106, 'seaborgium', 'seaborgide'],
-            [107, 'bohrium', 'bohride'],
-            [108, 'hassium', 'hasside'],
-            [109, 'meitnerium', 'meitneride'],
-            [110, 'darmstadtium', 'darmstadtide'],
-            [111, 'röntgenium', 'röntgenide'],
-            [112, 'copernicium', 'copernicide'],
-            [113, 'nihonium', 'nihonide'],
-            [114, 'flerovium', 'flerovide'],
-            [115, 'moscovium', 'muscovide'],
-            [116, 'livermorium', 'livermoride'],
-            [117, 'tennessine', 'tennesside'],
-            [118, 'oganesson', 'oganesside'],
-            [119, 'ununennium', 'ununennide'],
-            [120, 'unbinilium', 'unbinilide'],
-            [121, 'unbiunium', 'unbiunide'],
-            [122, 'unbibium', 'unbibide'],
-            [123, 'unbitrium', 'unbitride'],
-            [124, 'unbiquadium', 'unbiquadide'],
-            [125, 'unbipentium', 'unbipentide'],
-            [126, 'unbihexium', 'unbihexide'],
-            [127, 'unbiseptium', 'unbiseptide'],
-            [128, 'unbioctium', 'unbioctide'],
-            [129, 'unbiennium', 'unbiennide'],
-            [130, 'untrinilium', 'untrinilide'],
-            [131, 'untriunium', 'untriunide'],
-            [132, 'untribium', 'untribide'],
-            [133, 'untritrium', 'untritride'],
-            [134, 'untriquadium', 'untriquadide'],
-            [135, 'untripentium', 'untripentide'],
-            [136, 'untrihexium', 'untrihexide'],
-            [137, 'feynmanium', 'feynmanide']
+          const periodicTable = [
+            [0, 'neutronium', 'neutride', 'Nu', [0,0], 1.67492749804, 'theoretical', null, null],
+            [1, 'hydrogen', 'hydride', 'H', [1,1], 1.008, 'nonmetal', -259.16, -252.87],
+            [2, 'helium', 'helide', 'He', [18,1], 4.002602, 'noble gas', -272.2, -268.93],
+            [3, 'lithium', 'lithide', 'Li', [1,2], 6.94, 'alkali metal', 180.54, 1342],
+            [4, 'beryllium', 'beryllide', 'Be', [2,2], 9.0122, 'alkaline earth metal', 1287, 2469],
+            [5, 'boron', 'boride', 'B', [13,2], 10.81, 'metalloid', 2075, 4000],
+            [6, 'carbon', 'carbide', 'C', [14,2], 12.011, 'nonmetal', 3550, 4827],
+            [7, 'nitrogen', 'nitride', 'N', [15,2], 14.007, 'nonmetal', -210.1, -195.79],
+            [8, 'oxygen', 'oxide', 'O', [16,2], 15.999, 'nonmetal', -218.79, -182.95],
+            [9, 'fluorine', 'fluoride', 'F', [17,2], 18.998, 'halogen', -219.67, -188.11],
+            [10, 'neon', 'neide', 'Ne', [18,2], 20.180, 'noble gas', -248.59, -246.08],
+            [11, 'sodium', 'natride', 'Na', [1,3], 22.990, 'alkali metal', 97.72, 883],
+            [12, 'magnesium', 'magneside', 'Mg', [2,3], 24.305, 'alkaline earth metal', 650, 1090],
+            [13, 'aluminium', 'alumide', 'Al', [13,3], 26.982, 'post-transition metal', 660.3, 2470],
+            [14, 'silicon', 'silicide', 'Si', [14,3], 28.085, 'metalloid', 1414, 3265],
+            [15, 'phosphorous', 'phosphide', 'P', [15,3], 30.974, 'nonmetal', 44.15, 280.5],
+            [16, 'sulphur', 'sulphide', 'S', [16,3], 32.06, 'nonmetal', 115.21, 444.6],
+            [17, 'chlorine', 'chloride', 'Cl', [17,3], 35.45, 'halogen', -101.5, -34.04],
+            [18, 'argon', 'argide', 'Ar', [18,3], 39.948, 'noble gas', -189.34, -185.85],
+            [19, 'potassium', 'potasside', 'K', [1,4], 39.098, 'alkali metal', 63.5, 759],
+            [20, 'calcium', 'calcide', 'Ca', [2,4], 40.078, 'alkaline earth metal', 842, 1484],
+            [21, 'scandium', 'scandide', 'Sc', [3,4], 44.956, 'transition metal', 1541, 2836],
+            [22, 'titanium', 'titanide', 'Ti', [4,4], 47.867, 'transition metal', 1668, 3287],
+            [23, 'vanadium', 'vanadide', 'V', [5,4], 50.942, 'transition metal', 1910, 3407],
+            [24, 'chromium', 'chromide', 'Cr', [6,4], 51.996, 'transition metal', 1907, 2671],
+            [25, 'manganese', 'manganide', 'Ma', [7,4], 54.938, 'transition metal', 1244, 2095],
+            [26, 'iron', 'ferride', 'Fe', [8,4], 55.845, 'transition metal', 1538, 2862],
+            [27, 'cobalt', 'cobaltide', 'Co', [9,4], 58.933, 'transition metal', 1495, 2927],
+            [28, 'nickel', 'nickelide', 'Ni', [10,4], 58.693, 'transition metal', 1455, 2730],
+            [29, 'copper', 'cupride', 'Cu', [11,4], 63.546, 'transition metal', 1085, 2562],
+            [30, 'zinc', 'zincide', 'Zn', [12,4], 65.38, 'transition metal', 419.5, 907],
+            [31, 'gallium', 'gallide', 'Ga', [13,4], 69.723, 'post-transition metal', 29.76, 2204],
+            [32, 'germanium', 'germanide', 'Ge', [14,4], 72.63, 'metalloid', 938.3, 2833],
+            [33, 'arsenic', 'arsenide', 'As', [15,4], 74.922, 'metalloid', 817, 614],
+            [34, 'selenium', 'selenide', 'Se', [16,4], 78.971, 'nonmetal', 221, 685],
+            [35, 'bromine', 'bromide', 'Br', [17,4], 79.904, 'halogen', -7.2, 58.8],
+            [36, 'krypton', 'kryptide', 'Kr', [18,4], 83.798, 'noble gas', -157.4, -153.22],
+            [37, 'rubidium', 'rubide', 'Rb', [1,5], 85.468, 'alkali metal', 39.3, 688],
+            [38, 'strontium', 'strontide', 'Sr', [2,5], 87.62, 'alkaline earth metal', 777, 1382],
+            [39, 'yttrium', 'yttride', 'Y', [3,5], 88.906, 'transition metal', 1526, 3337],
+            [40, 'zirconium', 'zirconide', 'Zr', [4,5], 91.224, 'transition metal', 1855, 4377],
+            [41, 'niobium', 'niobide', 'Nb', [5,5], 92.906, 'transition metal', 2477, 4744],
+            [42, 'molybdenum', 'molybdenide', 'Mb', [6,5], 95.95, 'transition metal', 2623, 4639],
+            [43, 'technetium', 'technetide', 'Tc', [7,5], 98, 'transition metal', 2157, 4265],
+            [44, 'ruthenium', 'ruthenide', 'Ru', [8,5], 101.07, 'transition metal', 2334, 4150],
+            [45, 'rhodium', 'rhodide', 'Rh', [9,5], 102.91, 'transition metal', 1964, 3727],
+            [46, 'palladium', 'palladide', 'Pd', [10,5], 106.42, 'transition metal', 1554, 2963],
+            [47, 'silver', 'argentide', 'Ar', [11,5], 107.87, 'transition metal', 961.8, 2162],
+            [48, 'cadmium', 'cadmide', 'Cd', [12,5], 112.41, 'transition metal', 321.07, 767],
+            [49, 'indium', 'indide', 'In', [13,5], 114.82, 'post-transition metal', 156.6, 2072],
+            [50, 'tin', 'stannide', 'Sn', [14,5], 118.71, 'post-transition metal', 231.93, 2602],
+            [51, 'antimony', 'stibide', 'Sb', [15,5], 121.76, 'metalloid', 630.63, 1587],
+            [52, 'tellurium', 'telluride', 'Te', [16,5], 127.6, 'metalloid', 449.5, 988],
+            [53, 'iodine', 'iodide', 'I', [17,5], 126.90, 'halogen', 113.7, 184.3],
+            [54, 'xenon', 'xenide', 'Xe', [18,5], 131.29, 'noble gas', -111.8, -108.1],
+            [55, 'caesium', 'caeside', 'Cs', [1,6], 132.91, 'alkali metal', 28.44, 671],
+            [56, 'barium', 'baride', 'Ba', [2,6], 137.33, 'alkaline earth metal', 727, 1897],
+            [57, 'lanthanum', 'lanthanide', 'La', [3,6], 138.91, 'lanthanide', 920, 3464],
+            [58, 'cerium', 'cereide', 'Ce', [4,6], 140.12, 'lanthanide', 795, 3426],
+            [59, 'praseodymium', 'praseodymide', 'Pr', [5,6], 140.91, 'lanthanide', 931, 3127],
+            [60, 'neodymium', 'neodymide', 'Nd', [6,6], 144.24, 'lanthanide', 1024, 3074],
+            [61, 'promethium', 'promethide', 'Pm', [7,6], 145, 'lanthanide', 1042, 3000],
+            [62, 'samarium', 'samaride', 'Sm', [8,6], 150.36, 'lanthanide', 1072, 1794],
+            [63, 'europium', 'europium', 'Eu', [9,6], 151.96, 'lanthanide', 822, 1597],
+            [64, 'gadolinium', 'gadolinide', 'Gd', [10,6], 157.25, 'lanthanide', 1313, 3273],
+            [65, 'terbium', 'terbide', 'Tb', [11,6], 158.93, 'lanthanide', 1356, 3230],
+            [66, 'dysprosium', 'dysproside', 'Dy', [12,6], 162.50, 'lanthanide', 1412, 2562],
+            [67, 'holmium', 'holmide', 'Ho', [13,6], 164.93, 'lanthanide', 1474, 2700],
+            [68, 'erbium', 'erbide', 'Er', [14,6], 167.26, 'lanthanide', 1529, 2868],
+            [69, 'thulium', 'thulide', 'Tm', [15,6], 168.93, 'lanthanide', 1545, 1950],
+            [70, 'ytterbium', 'ytterbide', 'Yb', [16,6], 173.05, 'lanthanide', 824, 1196],
+            [71, 'lutetium', 'lutetide', 'Lu', [17,6], 174.97, 'lanthanide', 1663, 3402],
+            [72, 'hafnium', 'hafnide', 'Hf', [4,6], 178.49, 'transition metal', 2233, 4603],
+            [73, 'tantalum', 'tantalide', 'Ta', [5,6], 180.95, 'transition metal', 3017, 5458],
+            [74, 'tungsten', 'wolframide', 'W', [6,6], 183.84, 'transition metal', 3422, 5555],
+            [75, 'rhenium', 'rhenide', 'Rh', [7,6], 186.21, 'transition metal', 3186, 5596],
+            [76, 'osmium', 'osmide', 'Os', [8,6], 190.23, 'transition metal', 3045, 5027],
+            [77, 'iridium', 'iridide', 'Ir', [9,6], 192.22, 'transition metal', 2446, 4130],
+            [78, 'platinum', 'platinide', 'Pt', [10,6], 195.08, 'transition metal', 1768, 3825],
+            [79, 'gold', 'auride', 'Au', [11,6], 196.97, 'transition metal', 1064, 2856],
+            [80, 'mercury', 'hydragyride', 'Hg', [12,6], 200.59, 'transition metal', -38.83, 357],
+            [81, 'thallium', 'thallide', 'Tl', [13,6], 204.38, 'post-transition metal', 304, 1473],
+            [82, 'lead', 'plumbide', 'Pb', [14,6], 207.2, 'post-transition metal', 327.46, 1749],
+            [83, 'bismuth', 'bismide', 'Bi', [15,6], 208.98, 'post-transition metal', 271.5, 1564],
+            [84, 'polonium', 'polonide', 'Po', [16,6], 209, 'post-transition metal', 254, 962],
+            [85, 'astatine', 'astatide', 'As', [17,6], 210, 'halogen', 302, 337],
+            [86, 'radon', 'randide', 'Rn', [18,6], 222, 'noble gas', -71, -61.7],
+            [87, 'francium', 'francide', 'Fr', [1,7], 223, 'alkali metal', 27, 677],
+            [88, 'radium', 'radide', 'Ra', [2,7], 226, 'alkaline earth metal', 700, 1737],
+            [89, 'actinium', 'actinide', 'Ac', [3,7], 227, 'actinide', 1050, 3200],
+            [90, 'thorium', 'thoride', 'Th', [4,7], 232.04, 'actinide', 1750, 4800],
+            [91, 'protractinium', 'protractinide', 'Pa', [5,7], 231.04, 'actinide', 1572, 4000],
+            [92, 'uranium', 'uranide', 'U', [6,7], 238.03, 'actinide', 1132, 4131],
+            [93, 'neptunium', 'neptunide', 'Np', [7,7], 237, 'actinide', 640, 3900],
+            [94, 'plutonium', 'plutonide', 'Pu', [8,7], 244, 'actinide', 640, 3235],
+            [95, 'americium', 'americide', 'Am', [9,7], 243, 'actinide', 1176, 2607],
+            [96, 'curium', 'curide', 'Cm', [10,7], 247, 'actinide', 1340, 3110],
+            [97, 'berkelium', 'berkelide', 'Bk', [11,7], 247, 'actinide', 986, 2627],
+            [98, 'californium', 'californide', 'Cf', [12,7], 251, 'actinide', 900, 1743],
+            [99, 'einsteinium', 'einsteinide', 'Es', [13,7], 252, 'actinide', 860, null],
+            [100, 'fermium', 'fermide', 'Fm', [14,7], 257, 'actinide', null, null],
+            [101, 'mendelevium', 'mendelevide', 'Md/Mv', [15,7], 258, 'actinide', null, null],
+            [102, 'nobelium', 'nobelide', 'No', [16,7], 259, 'actinide', null, null],
+            [103, 'lawrencium', 'lawrencide', 'Lr', [17,7], 262, 'actinide', null, null],
+            [104, 'rutherfordium', 'rutherfordide', 'Rf', [4,8], 267, 'transition metal', null, null],
+            [105, 'dubnium', 'dubnide', 'Db', [5,8], 268, 'transition metal', null, null],
+            [106, 'seaborgium', 'seaborgide', 'Sg', [6,8], 269, 'transition metal', null, null],
+            [107, 'bohrium', 'bohride', 'Bh', [7,8], 270, 'transition metal', null, null],
+            [108, 'hassium', 'hasside', 'Hs', [8,8], 269, 'transition metal', null, null],
+            [109, 'meitnerium', 'meitneride', 'Mt', [9,8], 278, 'transition metal', null, null],
+            [110, 'darmstadtium', 'darmstadtide', 'Ds', [10,8], 281, 'transition metal', null, null],
+            [111, 'röntgenium', 'röntgenide', 'Rg', [11,8], 282, 'transition metal', null, null],
+            [112, 'copernicium', 'copernicide', 'Cn', [12,8], 285, 'transition metal', null, null],
+            [113, 'nihonium', 'nihonide', 'Nh', [13,8], 286, 'post-transition metal', null, null],
+            [114, 'flerovium', 'flerovide', 'Fl', [14,8], 289, 'post-transition metal', null, null],
+            [115, 'moscovium', 'muscovide', 'Mc', [15,8], 290, 'post-transition metal', null, null],
+            [116, 'livermorium', 'livermoride', 'Lr', [16,8], 293, 'post-transition metal', null, null],
+            [117, 'tennessine', 'tennesside', 'Ts', [17,8], 294, 'halogen', null, null],
+            [118, 'oganesson', 'oganesside', 'Og', [18,8], 294, 'noble gas', null, null],
+            [119, 'ununennium', 'ununennide', 'Uue', [1,9], 315, 'alkali metal', null, null],
+            [120, 'unbinilium', 'unbinilide', 'Ubn', [2,9], 320, 'alkaline earth metal', null, null],
+            [121, 'unbiunium', 'unbiunide', 'Ubu', [3,9], 321, 'superactinide', null, null],
+            [122, 'unbibium', 'unbibide', 'Ubb', [4,9], 322, 'superactinide', null, null],
+            [123, 'unbitrium', 'unbitride', 'Ubt', [5,9], 323, 'superactinide', null, null],
+            [124, 'unbiquadium', 'unbiquadide', 'Ubq', [6,9], 324, 'superactinide', null, null],
+            [125, 'unbipentium', 'unbipentide', 'Ubp', [7,9], 325, 'superactinide', null, null],
+            [126, 'unbihexium', 'unbihexide', 'Ubh', [8,9], 326, 'superactinide', null, null],
+            [127, 'unbiseptium', 'unbiseptide', 'Ubs', [9,9], 327, 'superactinide', null, null],
+            [128, 'unbioctium', 'unbioctide', 'Ubo', [10,9], 328, 'superactinide', null, null],
+            [129, 'unbiennium', 'unbiennide', 'Ube', [11,9], 329, 'superactinide', null, null],
+            [130, 'untrinilium', 'untrinilide', 'Utn', [12,9], 330, 'superactinide', null, null],
+            [131, 'untriunium', 'untriunide', 'Utu', [13,9], 331, 'superactinide', null, null],
+            [132, 'untribium', 'untribide', 'Utb', [14,9], 332, 'superactinide', null, null],
+            [133, 'untritrium', 'untritride', 'Utt', [15,9], 333, 'superactinide', null, null],
+            [134, 'untriquadium', 'untriquadide', 'Utq', [16,9], 334, 'superactinide', null, null],
+            [135, 'untripentium', 'untripentide', 'Utp', [17,9], 335, 'superactinide', null, null],
+            [136, 'untrihexium', 'untrihexide', 'Uth', [18,9], 336, 'superactinide', null, null],
+            [137, 'feynmanium', 'feynmanide', 'Fy', [1,10], 337, 'superactinide', null, null]
           ];
+          periodicTable[undefined] = [undefined, 'muonium', 'muide', 'Mu', [-1, 0], 0.113, 'exotic', null, null];
+          periodicTable[312] = [312, 'obamium', 'obamide', 'Ob', [-1, 0], 0.113, 'fictional meme alkali metal', 15, 630];
+          periodicTable[Infinity] = [Infinity, 'infinitium', 'infinitite', 'If', [-1, 0], Infinity, 'fictional material', Infinity, Infinity];
+          periodicTable[-312] = [-312, 'antiobamium', 'antiobamide', '-Ob', [-1, 0], 0.113, 'fictional meme antialkali metal', 15, 630];
+          periodicTable[-Infinity] = [-Infinity, 'antinfinitium', 'antinfinitite', '-If', [-1, 0], -Infinity, 'fictional antimaterial', -Infinity, -Infinity];
+          for (var i = 138; i <= 174; i += 1) {
+            var type;
+            if (i <= 143) type = 'superactinide';
+            else if (i > 143 && i <= 157) type = 'unquadquadide';
+            else if (i == 173) type = 'alkali metal';
+            else if (i == 174) type = 'alkaline earth metal';
+            else if (i < 174) type = 'impossible'
+            else type = 'exotic';
+            var suffa = ['Un', 'U'];
+            var suffb, suffc;
+            var j = i - 100;
+            var k = j;
+            switch (k % 10) {
+              case 0:
+                suffc = ['nil', 'n'];
+                break;
+              case 1:
+                suffc = ['un', 'u'];
+                break;
+              case 2:
+                suffc = ['bi', 'b'];
+                break;
+              case 3:
+                suffc = ['tri', 't'];
+                break;
+              case 4:
+                suffc = ['quad', 'q'];
+                break;
+              case 5:
+                suffc = ['pent', 'p'];
+                break;
+              case 6:
+                suffc = ['hex', 'h'];
+                break;
+              case 7:
+                suffc = ['sept', 's'];
+                break;
+              case 8:
+                suffc = ['oct', 'o'];
+                break;
+              default:
+                suffc = ['enn', 'n'];
+            }
+            switch ((j - (k % 10))/10 % 100) {
+              case 0:
+                suffb = ['nil', 'n'];
+                break;
+              case 1:
+                suffb = ['un', 'u'];
+                break;
+              case 2:
+                suffb = ['bi', 'b'];
+                break;
+              case 3:
+                suffb = ['tri', 't'];
+                break;
+              case 4:
+                suffb = ['quad', 'q'];
+                break;
+              case 5:
+                suffb = ['pent', 'p'];
+                break;
+              case 6:
+                suffb = ['hex', 'h'];
+                break;
+              case 7:
+                suffb = ['sept', 's'];
+                break;
+              case 8:
+                suffb = ['oct', 'o'];
+                break;
+              default:
+                suffb = ['enn', 'n'];
+            }
+            periodicTable[i] = [i, suffa[0].toLowerCase() + suffb[0] + suffc[0] + 'ium', suffa[0].toLowerCase() + suffb[0] + suffc[0] + 'ide', suffa[1].toString() + suffb[1] + suffc[1], [1+i, 10], 0.113, type, null, null];
+          }
+          for (var i = -1; i >= -174; i -= 1) periodicTable[i] = [i, 'anti' + periodicTable[-i][1], 'anti' + periodicTable[-i][2] + 'ide', '-' + periodicTable[-i][3], periodicTable[-i][4], 'anti' + periodicTable[-i][5], periodicTable[-i][6], periodicTable[-i][7]];
+          function showElement (number = 1) {
+            if ((number > 174) && number != 312) {
+              $('#atom-num').value = NaN;
+              number = Infinity;
+            }
+            if ((number < -174) && number != -312) {
+              $('#atom-num').value = NaN;
+              number = -Infinity;
+            }
+            $('#atom-num').value = periodicTable[number][0];
+            $('#atom-name').innerHTML = periodicTable[number][1];
+            $('#atom-covalent').innerHTML = periodicTable[number][2];
+            $('#atom-symbol').innerHTML = periodicTable[number][3];
+            $('#atom-coords').innerHTML = periodicTable[number][4];
+            $('#atom-mass').innerHTML = periodicTable[number][5];
+            $('#atom-type').innerHTML = periodicTable[number][6];
+            $('#atom-melt').innerHTML = periodicTable[number][7];
+            $('#atom-boil').innerHTML = periodicTable[number][8];
+          }
         </script>
       </div>
     </div>
@@ -987,552 +1757,6 @@
 
 
     <script>
-      // Axes and Trace Variables
-      var xr = 0, xrp = 0; // x real (x axis)
-      var xi = 0, xip = 0; // x imaginary (z axis)
-      var yr = 0, yrp = 0; // y real (y axis)
-      var yi = 0, yip = 0; // y imaginary (t axis)
-
-      var xiv = 0, xivp = 0; // x imaginary viewport
-      var inputs = ['xi', 'xr', 'xiv']; // each instance of the slider setup thing
-
-      var xrmin = -36, xrmax = 36; // x-real minimum/maximum
-      var ximin = -36, ximax = 36; // x-imaginary minimum/maximum
-
-      const scale = 5;
-
-      // Convenience stuff
-      const $ = (selector) => document.querySelector(selector);
-
-      // Canvas Declaration
-      const canvas = document.getElementById('graph-canvas');
-      const ctx = canvas.getContext('2d');
-      var canvasWidth = 360;
-      var canvasHeight = 360;
-      ctx.translate(canvas.width/2, canvas.height/2);
-      var scalex = 5;
-      var scaley = 5;
-      var do3D = false;
-      var toffxr = 0; // total xr-offset
-      var toffyr = 0; // total yr-offset
-      var toffyi = 0; // total yi-offset
-
-      window.addEventListener('load', function() {
-        document.querySelector('#homeTab').click();
-        document.querySelectorAll('.graph-adv').forEach(function(element) {
-            element.classList.add('hidden');
-        });
-        setInterval(function() {
-          // Update whether graph is 2D or 3D
-          if ($('#graph-dimension-3d').checked == true) {
-            do3D = true;
-          }
-          else {
-            do3D = false;
-          }
-          // Update whether to show the graph button
-          if ($('#graph-auto').checked != true) {
-            $('#graph-btn').style.display = 'block';
-          }
-          else {
-            $('#graph-btn').style.display = 'none';
-          }
-
-          // Continuously (every 37 ms) check for changes in xr,xi,yr,yi and push to span
-          var textx = '', texty = '';
-          // Mirror the value of x
-          if (xr != 0) {
-            textx += xr.toString();
-          }
-          if (xi != 0) {
-            textx += ' ';
-            if (xi < 0) {
-              textx += '- ' + ((-1) * xi).toString() + '<i>i</i>';
-            }
-            else if (xi > 0) {
-              if (xr != 0) textx += '+ '
-              textx += xi.toString() + '<i>i</i>';
-            }
-            else {
-              //textx += ' ± ?i'
-            }
-          }
-          if (xr == 0 && xi == 0) textx = '0'
-
-          // Solve for y and then store it
-          yr = solve(xr, xi, false);
-          yi = solve(xr, xi, true);
-
-          // Display the value of y
-          if (yr != 0) {
-            texty += yr.toString();
-          }
-          if (yr != 0) {
-            texty += ' ';
-            if (yi < 0) {
-              texty += '- ' + ((-1) * yi).toString() + '<i>i</i>';
-            }
-            else if (yi > 0) {
-              if (yr != 0) texty += '+ '
-              texty += yi.toString() + '<i>i</i>';
-            }
-            else {
-              //texty += ' ± ?i'
-            }
-          }
-          if (yr == 0 && yi == 0) texty = '0'
-          
-          $('#xri-showcase').innerHTML = textx;
-          $('#yri-showcase').innerHTML = texty;
-
-          // if the user selects to graph automatically (resource-consuming)
-          if ($('#graph-auto').checked == true) {
-            graphFunction();
-          }
-        }, 37);
-
-        $('#graphing').addEventListener('mouseover', function () {
-          if (pregraphed == false) pregraphed = true;
-          graphFunction();
-        });
-
-        $('#xi-input').addEventListener('input', function () {
-          xi = Number(this.value);
-          $('#xi-value').innerHTML = xi
-          
-        });
-
-        $('#xr-input').addEventListener('input', function () {
-          xr = Number(this.value);
-          $('#xr-value').innerHTML = xr;
-        });
-
-        $('#xiv-input').addEventListener('input', function () {
-          xiv = Number(this.value);
-          $('#xiv-value').innerHTML = xiv;
-        });
-
-        $('#graph-minor-step').addEventListener('input', function () {
-          $('#graph-major-step').step = this.value;
-        });
-
-        $('#graph-offset-xr').addEventListener('input', function () {
-          toffxr = Number(this.value);
-          resetOffset();
-          ctx.translate(toffxr, 0);
-          graphFunction();
-        });
-
-        $('#graph-offset-yr').addEventListener('input', function () {
-          toffyr = Number(this.value);
-          resetOffset();
-          ctx.translate(0, toffyr);
-          graphFunction();
-        });
-
-        $('#function-input').addEventListener('input', function () {
-          //func = eval($('#function-input').value);
-        });
-
-        canvas.addEventListener('mousewheel', function (e) {
-          e.preventDefault();
-          // Vertical scrolling
-          if (event.deltaY > 0) {
-            // Scroll down; ideally decrease y-i viewport
-            xiv -= Number($('#xiv-step-input').value);
-            if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
-            $('#xiv-input').value = xiv;
-            $('#xiv-value').innerHTML = xiv;
-          }
-          else if (event.deltaY < 0) {
-            // Scroll up; ideally increase y-i viewport
-            xiv += Number($('#xiv-step-input').value);
-            if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
-            $('#xiv-input').value = xiv;
-            $('#xiv-value').innerHTML = xiv;
-          }
-          // Horizontal scrolling
-          if (event.deltaX > 0) {
-            // Scroll left; decrease x-i viewport
-            xiv -= Number($('#xiv-step-input').value);
-            if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
-            $('#xiv-input').value = xiv;
-            $('#xiv-value').innerHTML = xiv;
-          }
-          else if (event.deltaX < 0) {
-            // Scroll right; increase x-i viewport
-            xiv += Number($('#xiv-step-input').value);
-            if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
-            $('#xiv-input').value = xiv;
-            $('#xiv-value').innerHTML = xiv;
-          }
-          graphFunction();
-        });
-
-        $('#xiv-td').addEventListener('mousewheel', function (e) {
-          // Horizontal scrolling
-          if (event.deltaX > 0) {
-            // Scroll left
-            xiv -= Number($('#xiv-step-input').value);
-            if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
-            $('#xiv-input').value = xiv;
-            $('#xiv-value').innerHTML = xiv;
-          }
-          else if (event.deltaX < 0) {
-            // Scroll right
-            xiv += Number($('#xiv-step-input').value);
-            if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
-            $('#xiv-input').value = xiv;
-            $('#xiv-value').innerHTML = xiv;
-          }
-          graphFunction();
-        });
-
-        $('#xr-td').addEventListener('mousewheel', function (e) {
-          // Horizontal scrolling
-          if (event.deltaX > 0) {
-            // Scroll left
-            xr -= Number($('#xr-step-input').value);
-            if (xr <= $('#xr-min-input').value) xr = Number($('#xr-min-input').value);
-            $('#xr-input').value = xr;
-            $('#xr-value').innerHTML = xr;
-          }
-          else if (event.deltaX < 0) {
-            // Scroll right
-            xr += Number($('#xr-step-input').value);
-            if (xr >= $('#xr-max-input').value) xr = Number($('#xr-max-input').value);
-            $('#xr-input').value = xr;
-            $('#xr-value').innerHTML = xr;
-          }
-          graphFunction();
-        });
-
-        $('#xi-td').addEventListener('mousewheel', function (e) {
-          // Horizontal scrolling
-          if (event.deltaX > 0) {
-            // Scroll left
-            xi -= Number($('#xi-step-input').value);
-            if (xi <= $('#xi-min-input').value) xi = Number($('#xi-min-input').value);
-            $('#xi-input').value = xi;
-            $('#xi-value').innerHTML = xi;
-          }
-          else if (event.deltaX < 0) {
-            // Scroll right
-            xi += Number($('#xi-step-input').value);
-            if (xi >= $('#xi-max-input').value) xi = Number($('#xi-max-input').value);
-            $('#xi-input').value = xi;
-            $('#xi-value').innerHTML = xi;
-          }
-          graphFunction();
-        });
-
-        $('#graph-advanced').addEventListener('input', function () {
-          const graphAdvElements = document.querySelectorAll('.graph-adv');
-          
-          if (!this.checked) {
-              graphAdvElements.forEach(function(element) {
-                  element.classList.add('hidden');
-              });
-          } else {
-              graphAdvElements.forEach(function(element) {
-                  element.classList.remove('hidden');
-              });
-          }
-      });
-
-        function resetOffset () {
-          ctx.translate(-toffxr, -toffyr);
-        }
-
-        function inputSetup (prefix) {
-          // Change xi minimum
-          $('#' + prefix + '-min-input').addEventListener('input', function () {
-            $('#' + prefix + '-input').min = Number($('#' + prefix + '-min-input').value);
-            $('#' + prefix + '-max-input').min = $('#' + prefix + '-input').min;
-          });
-
-          // Change xi maximum
-          $('#' + prefix + '-max-input').addEventListener('input', function () {
-            $('#' + prefix + '-input').max = Number($('#' + prefix + '-max-input').value);
-            $('#' + prefix + '-min-input').max = $('#' + prefix + '-input').max;
-          });
-
-          // Change xi step
-          $('#' + prefix + '-step-input').addEventListener('input', function () {
-            $('#' + prefix + '-input').step = Number($('#' + prefix + '-step-input').value);
-          });
-
-          // Change xi input type
-          $('#' + prefix + '-type-input').addEventListener('input', function () {
-            if ($('#' + prefix + '-type-input').checked != true && $('#' + prefix + '-type-input').checked != 'checked') {
-              $('#' + prefix + '-input').type = 'number';
-              $('#' + prefix + '-input').removeAttribute('min');
-              $('#' + prefix + '-input').removeAttribute('max');
-              $('#' + prefix + '-min-input').disabled = 'disabled';
-              $('#' + prefix + '-max-input').disabled = 'disabled';
-            }
-            else {
-              $('#' + prefix + '-input').type = 'range';
-              $('#' + prefix + '-min-input').removeAttribute('disabled');
-              $('#' + prefix + '-max-input').removeAttribute('disabled');
-              if (Number($('#' + prefix + '-input').value) > Number($('#' + prefix + '-max-input').value)) {
-                $('#' + prefix + '-max-input').value = $('#' + prefix + '-input').value;
-              }
-              if (Number($('#' + prefix + '-input').value) < Number($('#' + prefix + '-min-input').value)) {
-                $('#' + prefix + '-min-input').value = $('#' + prefix + '-input').value;
-              }
-              
-              $('#' + prefix + '-input').max = Number($('#' + prefix + '-max-input').value);
-              $('#' + prefix + '-input').min = Number($('#' + prefix + '-min-input').value);
-            }
-          });
-        }
-        for (var i = 0; i < inputs.length; i++) {
-          inputSetup(inputs[i]);
-        }
-        //drawGrid(6, 1);
-      });
-
-      function drawGrid (majorStep, minorStep) {
-        var mS;
-        if (minorStep != undefined) {
-          mS = minorStep;
-        }
-        else {
-          mS = 1;
-        }
-        //ctx.translate(0, 0);
-        // Draw the x and y axes
-        // xr-axis
-        ctx.beginPath();
-        ctx.moveTo(-canvas.width, 0);
-        ctx.lineTo(canvas.width, 0);
-        ctx.strokeStyle = 'blue';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // yr-axis
-        ctx.beginPath();
-        ctx.moveTo(0, -canvas.height);
-        ctx.lineTo(0, canvas.height);
-        ctx.strokeStyle = 'red';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Draw all of the gridlines
-        for (var i = -canvas.height/2; i < canvas.height/2; i += 5) {
-          ctx.strokeStyle = 'grey';
-          // Determine whether to do major or minor lines
-          if ((i/5) % majorStep == 0) {
-            ctx.lineWidth = 0.25;
-          }
-          else if ((i/5) % mS == 0) {
-            ctx.lineWidth = 0.125;
-          }
-          else {
-            ctx.lineWidth = 0.03125;
-          }
-          if ($('#graph-grids').checked == true) {
-            // Draw quadrants I and IV
-            // Vertical
-            ctx.beginPath();
-            ctx.moveTo(i, -canvas.height);
-            ctx.lineTo(i, canvas.height);
-            ctx.stroke();
-            // Horizontal
-            ctx.beginPath();
-            ctx.moveTo(-canvas.width, i);
-            ctx.lineTo(canvas.width, i);
-            ctx.stroke();
-            // Draw quadrants II and III
-            // Vertical
-            ctx.beginPath();
-            ctx.moveTo(-1 * i, -canvas.height);
-            ctx.lineTo(-1 * i, canvas.height);
-            ctx.stroke();
-            // Horizontal
-            ctx.beginPath();
-            ctx.moveTo(-canvas.width, i);
-            ctx.lineTo(canvas.width, i);
-            ctx.stroke();
-          }
-          // Draw tick marks if selected
-          if ($('#graph-ticks').checked == true) {
-            // Number($('#graph-tick-height').value)
-            ctx.lineWidth = 0.5;
-            // Draw quadrants I and IV
-            // Vertical
-            ctx.strokeStyle = 'blue';
-            ctx.beginPath();
-            ctx.moveTo(i, -Number($('#graph-tick-height').value));
-            ctx.lineTo(i, Number($('#graph-tick-height').value));
-            ctx.stroke();
-            // Horizontal
-            ctx.strokeStyle = 'red';
-            ctx.beginPath();
-            ctx.moveTo(-Number($('#graph-tick-height').value), i);
-            ctx.lineTo(Number($('#graph-tick-height').value), i);
-            ctx.stroke();
-            // Draw quadrants II and III
-            // Vertical
-            ctx.strokeStyle = 'blue';
-            ctx.beginPath();
-            ctx.moveTo(-1 * i, -Number($('#graph-tick-height').value));
-            ctx.lineTo(-1 * i, Number($('#graph-tick-height').value));
-            ctx.stroke();
-            // Horizontal
-            ctx.strokeStyle = 'red';
-            ctx.beginPath();
-            ctx.moveTo(-Number($('#graph-tick-height').value), i);
-            ctx.lineTo(Number($('#graph-tick-height').value), i);
-            ctx.stroke();
-          }
-        }
-      }
-
-      function drawGrid3D () {
-        // yi-axis
-        ctx.beginPath();
-        ctx.moveTo(canvas.height/2, canvas.height/4);
-        ctx.lineTo(-canvas.height/2, -canvas.height/4);
-        ctx.lineWidth = 1.75;
-        ctx.strokeStyle = 'green';
-        ctx.stroke();
-        // c2 = sqrt(a2 + b2)
-        const iidiag = Math.sqrt(180**2 + 90**2);
-        const iictick = iidiag / 180; // iidiag's calculatory tick
-        // make a triangle mathematically similar to iidiag's
-        // hypotenuse = iictick
-        // find legs (vertical a and horizontal 2a)
-        // sqrt(a2 + 4a2) = iictick
-        // a^2 + 4a^2 = iictick^2
-        // 5a^2 = iictick^2
-        // 5a = iictick
-        // a = iictick/5
-        const a = (iictick * Math.sqrt(5))/5;
-        // i is the x position; j is the y position
-        var j = 90;
-        var k = 0;
-        for (var i = -canvas.width/2; i < iidiag; i += (2*a)) {
-          if ($('#graph-ticks').checked == true) {
-            ctx.beginPath()
-            if (k % 6 == 0) {
-              ctx.moveTo(i, -j + Number($('#graph-tick-height').value));
-              ctx.lineTo(i, -j - Number($('#graph-tick-height').value));
-              //ctx.lineTo(i + (2*a), j - a);
-              ctx.lineWidth = 1.5;
-              ctx.stroke();
-            }
-          }
-          j -= a;
-          k ++;
-        }
-        /*for (var i = -canvas.width/2; i < 180; i += (2 * a)) {
-          ctx.beginPath();
-          ctx.moveTo(i, -5);
-          ctx.lineTo(i + 2 * a, a+5);
-          ctx.stroke();
-        }*/
-      }
-
-      // Round numbers
-      function round (num, pwr) {
-        if (num == undefined) {
-          return 0;
-        }
-        var p = pwr;
-        if (p == undefined) {
-          p = 0;
-        }
-        else {
-          return Math.round(num * 10 ** -p) / 10 ** -p;
-        }
-      }
-      // Solve the function for some X
-      function solve2D (x) {
-        // solve y = x^2/9 + x - 1
-        let func2D = (0.037) * x ** 2 + x - 10; //eval($('#function-input').value);
-        return round(func2D, Number($('#trace-round').value));
-      }
-      function countOccurrences(str, search) {
-        return str.split(search).length - 1;
-      }
-      function solve (x, i, solveComplex, whence) {
-        if (whence == undefined) whence = 1;
-        // Read the function input
-        let scope = {
-          x: math.complex(x, i),
-          tet: tet,
-        };
-        var functext = $('#function-input').value.toString();
-        functext = functext.replace(/([\d\w\)\.]+)\s*\^\^\s*([\d\w\(\)\.]+)/g, 'tet($1,$2)'); // Tetration
-        functext = functext.replace('{','(').replace('}', ')'); // Minimal LaTeX cross-compatibility
-        functext = functext.replace(/\|([^|]+)\|/g, 'abs($1)'); // Absolute value
-        // Constant Functions
-        if (countOccurrences(functext, 'x') == 0) functext = '(' + functext + ')x^0';
-        // Finalise the function
-        let func = math.evaluate(1 + '(' + functext + ')', scope);
-        if (solveComplex == false || solveComplex == undefined) {
-          return round(func.re, Number($('#trace-round').value));
-        }
-        else {
-          var a = round(func.im, Number($('#trace-round').value));
-          return round(func.im, Number($('#trace-round').value));
-        }
-      }
-
-      function graphFunction () {
-        var roc = false;
-        ctx.setTransform(1, 0, 0, 1, 0, 0);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.translate(canvas.width/2 + 5 * toffxr, canvas.height/2 + 5 * toffyr);
-        drawGrid(Number($('#graph-major-step').value), Number($('#graph-minor-step').value));
-        if (do3D == true) drawGrid3D();
-        ctx.strokeStyle = $('#function-colour').value;
-        
-        //ctx.translate(180, 180);
-        for (var i = -canvas.width/2 - $('#graph-offset-xr').value; i < canvas.width/2 - $('#graph-offset-xr').value; i += 5/10) {
-          let width = 1;
-          // The linear graph
-          var xrt = i;
-          var yrt = -solve(xrt, Number($('#xiv-input').value), false);
-          var xrtNext = i + 5/10;
-          var yrtNext = -solve(xrtNext, Number($('#xiv-input').value), false);
-          if ($('#graph-dimension-xi').checked == true) {
-            yrt = -solve(Number($('#xiv-input').value), xrt, false);
-            yrtNext = -solve(Number($('#xiv-input').value), xrtNext, false)
-          }
-          // Vertical asymptotes
-          if (!isFinite(yrtNext) && yrtNext != undefined) {
-            var xrtMext = i + 1 / 10 ** Number($('#trace-round').value);
-            var yrtMext = -solve(xrtMext, Number($('#xiv-input').value), false);
-            yrtNext = (yrtMext > 0) ? -360 : 360;
-          }
-
-          if (!isFinite(yrt) && yrt != undefined) {
-            var xrtMext = i + 1 / 10 ** Number($('#trace-round').value);
-            var yrtMext = -solve(xrtMext, Number($('#xiv-input').value), false);
-            yrt = (yrtMext > 0) ? 360 : -360;
-          }
-          ctx.lineWidth = width;
-          ctx.moveTo(scale * xrt, scale * yrt);
-          ctx.lineTo(scale * xrtNext, scale * yrtNext);
-          ctx.stroke();
-          // The pointed graph
-          if (i % Number($('#graph-major-step').value) == 0 && $('#graph-points').checked == true) {
-            ctx.beginPath();
-            ctx.arc(scale * xrt, scale * yrt, 1.25, 0, 2 * Math.PI);
-            ctx.fillStyle = $('#function-colour').value;
-            ctx.fill();
-            ctx.lineWidth = 0;
-            ctx.stroke();
-          }
-        }
-      }
-
-      
-
-
       // Scientific Calculator
       function tetOld(x,y) {
         if (y == 2) {
