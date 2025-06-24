@@ -224,7 +224,7 @@
 
         window.addEventListener('load', function() {
           // Utiliser HTTP en lieu d'HTTPS à cause de l'HTTP est incompatible avec mon domain
-          if (window.location.href.substring(0, 5) != 'http:') window.location.href = 'http://' + window.location.href.substring(8, 0);
+          if (window.location.href.slice(0, 5) !== 'http:') window.location.href = 'http://' + window.location.href.slice(8);
           document.querySelector('#homeTab').click();
           document.querySelectorAll('.graph-adv').forEach(function(element) {
               element.classList.add('hidden');
