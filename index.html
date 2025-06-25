@@ -169,8 +169,8 @@
                       <hr/>
                       <span id='graph-scale-span-sub'>Scale: <input type='number' id='graph-scale' value='1' step='0.5'/></span>
                       <br/>
+                      Density: <input type='number' id='graph-density' value='10' step='1'/>
                     </span>
-                    <!--Density: <input type='number' id='graph-density' value='10' step='1'/>-->
                   </center>
                 </td>
                 
@@ -345,34 +345,11 @@
           });
 
           $('#graph-fullscreen-btn').addEventListener('click', function () {
+            fullscreen = !fullscreen;
             var modal = $('#graph-fullscreen-modal');
             var container = $('#graph-container');
             var scaleContainer = $('#graph-scale-span-container');
             var scaleContainerSub = $('#graph-scale-span-sub');
-            if (fullscreen === false) {
-              modal.innerHTML = '';
-              modal.appendChild($('#graph-fullscreen-btn'));
-              modal.appendChild($('#graph-div'));
-              modal.appendChild($('#graph-scale-span'));
-              modal.appendChild($('#xiv-td-content'));
-              modal.appendChild($('#graph-xryr-offset-div'));
-              document.body.style.overflowY = 'hidden';
-              $('#graph-fullscreen-btn').innerHTML = '<i class="fa fa-compress"></i> Exit';
-              canvas.style.transform = 'scale(' + this.value + ')';
-              scaleContainerSub.style.position = 'relative';
-              scaleContainerSub.style.bottom = '20px';
-              scaleContainerSub.style.left = 'calc(' + modal.parentElement.offsetWidth / 2 + ' - ' + scaleContainerSub.offsetWidth / 2 + 'px)';
-            }
-            else {
-              container.appendChild($('#graph-fullscreen-btn'));
-              container.appendChild($('#graph-div'));
-              scaleContainer.appendChild($('#graph-scale-span'));
-              $('#xiv-td').appendChild($('#xiv-td-content'));
-              $('#graph-xryr-offset-div-container-span').appendChild($('#graph-xryr-offset-div'));
-              document.body.style.overflowY = 'scroll';
-              canvas.style.transform = 'scale(1)';
-              scaleContainerSub.style.position = 'static';
-            }
             modal.classList.toggle('hidden');
             scaleContainerSub.classList.toggle('modal');
             scaleContainerSub.classList.toggle('free');
@@ -381,7 +358,42 @@
             $('#graph-xryr-offset-div').classList.toggle('modal');
             $('#graph-xryr-offset-div').classList.toggle('free');
             modal.parentElement.classList.toggle('hidden');
-            fullscreen = !fullscreen;
+            if (fullscreen === true) { // if fullscreen is now entered
+              modal.innerHTML = '';
+              modal.appendChild($('#graph-div'));
+              modal.appendChild($('#graph-scale-span'));
+              modal.appendChild($('#xiv-td-content'));
+              modal.appendChild($('#graph-xryr-offset-div'));
+              modal.appendChild(this);
+              document.body.style.overflowY = 'hidden';
+              this.innerHTML = '<i class="fa fa-compress" style="z-index: 250;"></i> Exit';
+              canvas.style.transform = 'scale(' + this.value + ')';
+              /*scaleContainerSub.style.position = 'relative';
+              scaleContainerSub.style.top = '-20px';
+              scaleContainerSub.style.left = 'calc(' + modal.parentElement.offsetWidth / 2 + ' - ' + this.offsetWidth / 2 + 'px)';
+              $('#xiv-td-content').style.position = 'relative';
+              $('#xiv-td-content').style.top = '-10px';
+              $('#xiv-td-content').style.left = 'calc(' + modal.parentElement.offsetWidth / 2 + ' - ' + this.offsetWidth / 2 + 'px)';
+              $('#graph-xryr-offset-div').style.position = 'relative';
+              $('#graph-xryr-offset-div').style.bottom = '-10px';
+              $('#graph-xryr-offset-div').style.left = 'calc(' + modal.parentElement.offsetWidth / 2 + ' - ' + this.offsetWidth / 2 + 'px)';*/
+              this.style.position = 'fixed';
+              this.style.bottom = '10px';
+              this.style.marginLeft = 'auto;'
+              this.style.marginRight = 'auto;'
+            }
+            else { // when exiting fullscreen
+              container.appendChild($('#graph-fullscreen-btn'));
+              container.appendChild($('#graph-div'));
+              scaleContainer.appendChild($('#graph-scale-span'));
+              $('#xiv-td').appendChild($('#xiv-td-content'));
+              $('#graph-xryr-offset-div-container-span').appendChild($('#graph-xryr-offset-div'));
+              document.body.style.overflowY = 'scroll';
+              canvas.style.transform = 'scale(1)';
+              scaleContainerSub.style.position = 'static';
+              this.style.position = 'static';
+              this.innerHTML = '<i class="fa fa-expand"></i> Fullscreen';
+            }
           });
 
           $('#graph-scale').addEventListener('input', function () {
@@ -399,37 +411,68 @@
             else canvas.style.transform = 'scale(1)';
           });
 
-          canvas.addEventListener('mousewheel', function (e) {
+          canvas.addEventListener('wheel', function (e) {
             e.preventDefault();
-            // Vertical scrolling
-            if (event.deltaY > 0) {
-              // Scroll down; ideally decrease y-i viewport
-              xiv -= Number($('#xiv-step-input').value);
-              if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
-              $('#xiv-input').value = xiv;
-              $('#xiv-value').innerHTML = xiv;
+            if (fullscreen != true) {
+              // Vertical scrolling
+              if (e.deltaY > 0) {
+                // Scroll down; ideally decrease y-i viewport
+                xiv -= Number($('#xiv-step-input').value);
+                if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
+                $('#xiv-input').value = xiv;
+                $('#xiv-value').innerHTML = xiv;
+              }
+              else if (e.deltaY < 0) {
+                // Scroll up; ideally increase y-i viewport
+                xiv += Number($('#xiv-step-input').value);
+                if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
+                $('#xiv-input').value = xiv;
+                $('#xiv-value').innerHTML = xiv;
+              }
+              // Horizontal scrolling
+              if (e.deltaX > 0) {
+                // Scroll left; decrease x-i viewport
+                xiv -= Number($('#xiv-step-input').value);
+                if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
+                $('#xiv-input').value = xiv;
+                $('#xiv-value').innerHTML = xiv;
+              }
+              else if (e.deltaX < 0) {
+                // Scroll right; increase x-i viewport
+                xiv += Number($('#xiv-step-input').value);
+                if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
+                $('#xiv-input').value = xiv;
+                $('#xiv-value').innerHTML = xiv;
+              }
             }
-            else if (event.deltaY < 0) {
-              // Scroll up; ideally increase y-i viewport
-              xiv += Number($('#xiv-step-input').value);
-              if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
-              $('#xiv-input').value = xiv;
-              $('#xiv-value').innerHTML = xiv;
-            }
-            // Horizontal scrolling
-            if (event.deltaX > 0) {
-              // Scroll left; decrease x-i viewport
-              xiv -= Number($('#xiv-step-input').value);
-              if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
-              $('#xiv-input').value = xiv;
-              $('#xiv-value').innerHTML = xiv;
-            }
-            else if (event.deltaX < 0) {
-              // Scroll right; increase x-i viewport
-              xiv += Number($('#xiv-step-input').value);
-              if (xiv >= $('#xiv-max-input').value) xiv = Number($('#xiv-max-input').value);
-              $('#xiv-input').value = xiv;
-              $('#xiv-value').innerHTML = xiv;
+            else if (fullscreen == true) {
+              // Vertical scrolling
+              if (e.deltaY > 0) {
+                // Scroll down; ideally decrease yr offset
+                toffyr -= Number($('#graph-offset-yr').step);
+                //if (toffyr <= $('#offset-yr').min) toffyr = Number($('#xiv-min-input').value);
+                $('#graph-offset-yr').value = toffyr;
+              }
+              else if (e.deltaY < 0) {
+                // Scroll up; ideally increase yr offset
+                toffyr += Number($('#graph-offset-yr').step);
+                //if (toffyr >= $('#offset-yr').max) toffyr = Number($('#xiv-max-input').value);
+                $('#graph-offset-yr').value = toffyr;
+              }
+              // Horizontal scrolling
+              if (e.deltaX > 0) {
+                // Scroll left; ideally decrease xr offset
+                toffxr -= Number($('#graph-offset-xr').step);
+                //if (xiv <= $('#xiv-min-input').value) xiv = Number($('#xiv-min-input').value);
+                $('#graph-offset-xr').value = toffxr;
+              }
+              else if (e.deltaX < 0) {
+                // Scroll right; ideally increase xr offset
+                toffxr += Number($('#graph-offset-xr').step);
+                //if (toffxr >= $('#xiv-max-input').value) toffxr = Number($('#xiv-max-input').value);
+                $('#graph-offset-xr').value = toffxr;
+              }
+              graphFunction();
             }
             graphFunction();
           });
