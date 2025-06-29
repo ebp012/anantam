@@ -80,7 +80,7 @@
                   </div>
                   <input type='checkbox' id='xi-type-input' checked='checked'/> <label for='xi-type-input'>Slider input?</label>
                 </td>
-                <td rowspan='2'>
+                <td rowspan='2' style='border-radius: 6px 6px 9px 6px;'>
                   <center>
                     Minor step: <input id='graph-minor-step' type='number' min='0' step='0.5' value='1' title='distance between thinner gridlines. set to 0 to disable them entirely.'/><br/>
                     Major step: <input id='graph-major-step' type='number' min='0' value='6' title='distance between thicker gridlines. set to 0 to disable them entirely.'/>
@@ -158,18 +158,18 @@
                     <button class='fa fa-plus' id='equation-new'></button>
                   </center>
                 </td>
-                <td>
+                <td style='border-radius: 6px;'>
                   <center id='graph-scale-span-container'>
                     <strong>Trace</strong><br/>
                     x: <span id='xri-showcase'>? + ?i</span><br/>
                     y: <span id='yri-showcase'>? + ?i</span><br/>
                     <hr/>
-                    Round: 10<sup><input id='trace-round' type='number' style='font-size: calc(inherit * 0.25);' value='-3'/></sup>
+                    Round: 10<sup><input id='trace-round' type='number' style='font-size: calc(inherit * 0.25);' min='-3' value='-1' step='1'/></sup>
                     <span id='graph-scale-span'>
                       <hr/>
                       <span id='graph-scale-span-sub'>Scale: <input type='number' id='graph-scale' value='1' step='0.5'/></span>
                       <br/>
-                      Density: <input type='number' id='graph-density' value='10' step='1'/>
+                      <!--Density: <input type='number' id='graph-density' value='10' step='1'/>-->
                     </span>
                   </center>
                 </td>
@@ -207,7 +207,7 @@
         var xrmin = -36, xrmax = 36; // x-real minimum/maximum
         var ximin = -36, ximax = 36; // x-imaginary minimum/maximum
 
-        const scale = 5; // how zoomed in the graph is
+        var scale = 5; // how zoomed in the graph is
         var inputScale = 1;
 
         var fullscreen = false; // est-on plein écran (fullscreen) ou non
@@ -231,7 +231,7 @@
         window.addEventListener('load', function() {
           // Utiliser HTTP en lieu d'HTTPS à cause de l'HTTP est incompatible avec mon domain
           //if (window.location.href.slice(0, 5) !== 'http:') window.location.href = 'http://' + window.location.href.slice(8);
-
+          graphFunction();
           document.querySelector('#homeTab').click();
           document.querySelectorAll('.graph-adv').forEach(function(element) {
               element.classList.add('hidden');
@@ -252,7 +252,18 @@
               $('#graph-btn').style.display = 'none';
             }
 
-            // Continuously (every 37 ms) check for changes in xr,xi,yr,yi and push to span
+          }, 37);
+
+          document.querySelectorAll('#graphing input[type=text], #graphing input[type=number], #graphing input[type=checkbox], #graphing select').forEach(input => {
+            input.addEventListener('input', function () {
+              // if the user selects to graph automatically (resource-consuming)
+              if ($('#graph-auto').checked == true) graphFunction();
+            });
+          });
+
+          document.querySelectorAll('#graphing input[type=range], #graphing td input[type=number]:first-of-type').forEach(input => {
+            input.addEventListener('input', function () {
+              // NO MORE ~~~~Continuously (every 37 ms) check for changes in xr,xi,yr,yi and push to span~~~~
             var textx = '', texty = '';
             // Mirror the value of x
             if (xr != 0) {
@@ -298,12 +309,9 @@
             
             $('#xri-showcase').innerHTML = textx;
             $('#yri-showcase').innerHTML = texty;
+            });
+          });
 
-            // if the user selects to graph automatically (resource-consuming)
-            if ($('#graph-auto').checked == true) {
-              graphFunction();
-            }
-          }, 37);
 
           $('#graphing').addEventListener('mouseover', function () {
             if (pregraphed == false) pregraphed = true;
@@ -602,6 +610,8 @@
         });
 
         function drawGrid (majorStep, minorStep) {
+          var imax = toffxr * 5;
+          var imay = toffyr * 5;
           var mS;
           if (minorStep != undefined) {
             mS = minorStep;
@@ -613,55 +623,78 @@
           // Draw the x and y axes
           // xr-axis
           ctx.beginPath();
-          ctx.moveTo(-canvas.width, 0);
-          ctx.lineTo(canvas.width, 0);
+          ctx.moveTo(-canvas.width - imax, 0);
+          ctx.lineTo(canvas.width - imax, 0);
           ctx.strokeStyle = 'blue';
           ctx.lineWidth = 2;
           ctx.stroke();
 
           // yr-axis
           ctx.beginPath();
-          ctx.moveTo(0, -canvas.height);
-          ctx.lineTo(0, canvas.height);
+          ctx.moveTo(0, -canvas.height - imay);
+          ctx.lineTo(0, canvas.height - imay);
           ctx.strokeStyle = 'red';
           ctx.lineWidth = 2;
           ctx.stroke();
 
           // Draw all of the gridlines
-          for (var i = -canvas.height/2; i < canvas.height/2; i += 5) {
+          for (var i = -canvas.width/2 - imay; i < canvas.width/2 - imay; i += 5) {
             ctx.strokeStyle = 'grey';
             // Determine whether to do major or minor lines
-            if ((i/5) % majorStep == 0) {
-              ctx.lineWidth = 0.25;
+            if ((i/5) % majorStep == 0) ctx.lineWidth = 0.25;
+            else if ((i/5) % mS == 0) ctx.lineWidth = 0.125;
+            else ctx.lineWidth = 0.03125;
+            if ($('#graph-grids').checked == true) {
+              // Draw quadrants I and IV
+              // Horizontal
+              ctx.beginPath();
+              ctx.moveTo(-canvas.width + toffxr, i);
+              ctx.lineTo(canvas.width + toffxr, i);
+              ctx.stroke();
+              // Draw quadrants II and III
+              // Horizontal
+              ctx.beginPath();
+              ctx.moveTo(-canvas.width - toffxr, i);
+              ctx.lineTo(canvas.width - toffxr, i);
+              ctx.stroke();
             }
-            else if ((i/5) % mS == 0) {
-              ctx.lineWidth = 0.125;
+            // Draw tick marks if selected
+            if ($('#graph-ticks').checked == true) {
+              // Number($('#graph-tick-height').value)
+              ctx.lineWidth = 0.5;
+              // Draw quadrants I and IV
+              // Horizontal
+              ctx.strokeStyle = 'red';
+              ctx.beginPath();
+              ctx.moveTo(-Number($('#graph-tick-height').value), i);
+              ctx.lineTo(Number($('#graph-tick-height').value), i);
+              ctx.stroke();
+              // Draw quadrants II and III
+              ctx.strokeStyle = 'red';
+              ctx.beginPath();
+              ctx.moveTo(-Number($('#graph-tick-height').value), i);
+              ctx.lineTo(Number($('#graph-tick-height').value), i);
+              ctx.stroke();
             }
-            else {
-              ctx.lineWidth = 0.03125;
-            }
+          }
+          for (var i = -canvas.height/2 - imax; i < canvas.height/2 - imax; i += 5) {
+            ctx.strokeStyle = 'grey';
+            // Determine whether to do major or minor lines
+            if ((i/5) % majorStep == 0) ctx.lineWidth = 0.25;
+            else if ((i/5) % mS == 0) ctx.lineWidth = 0.125;
+            else ctx.lineWidth = 0.03125;
             if ($('#graph-grids').checked == true) {
               // Draw quadrants I and IV
               // Vertical
               ctx.beginPath();
-              ctx.moveTo(i, -canvas.height);
-              ctx.lineTo(i, canvas.height);
-              ctx.stroke();
-              // Horizontal
-              ctx.beginPath();
-              ctx.moveTo(-canvas.width, i);
-              ctx.lineTo(canvas.width, i);
+              ctx.moveTo(i, -canvas.height - toffyr);
+              ctx.lineTo(i, canvas.height - toffyr);
               ctx.stroke();
               // Draw quadrants II and III
               // Vertical
               ctx.beginPath();
-              ctx.moveTo(-1 * i, -canvas.height);
-              ctx.lineTo(-1 * i, canvas.height);
-              ctx.stroke();
-              // Horizontal
-              ctx.beginPath();
-              ctx.moveTo(-canvas.width, i);
-              ctx.lineTo(canvas.width, i);
+              ctx.moveTo(-1 * i, -canvas.height - toffyr);
+              ctx.lineTo(-1 * i, canvas.height - toffyr);
               ctx.stroke();
             }
             // Draw tick marks if selected
@@ -675,24 +708,12 @@
               ctx.moveTo(i, -Number($('#graph-tick-height').value));
               ctx.lineTo(i, Number($('#graph-tick-height').value));
               ctx.stroke();
-              // Horizontal
-              ctx.strokeStyle = 'red';
-              ctx.beginPath();
-              ctx.moveTo(-Number($('#graph-tick-height').value), i);
-              ctx.lineTo(Number($('#graph-tick-height').value), i);
-              ctx.stroke();
               // Draw quadrants II and III
               // Vertical
               ctx.strokeStyle = 'blue';
               ctx.beginPath();
               ctx.moveTo(-1 * i, -Number($('#graph-tick-height').value));
               ctx.lineTo(-1 * i, Number($('#graph-tick-height').value));
-              ctx.stroke();
-              // Horizontal
-              ctx.strokeStyle = 'red';
-              ctx.beginPath();
-              ctx.moveTo(-Number($('#graph-tick-height').value), i);
-              ctx.lineTo(Number($('#graph-tick-height').value), i);
               ctx.stroke();
             }
           }
@@ -797,14 +818,18 @@
           drawGrid(Number($('#graph-major-step').value), Number($('#graph-minor-step').value));
           if (do3D == true) drawGrid3D();
           ctx.strokeStyle = $('#function-colour').value;
-          
-          //ctx.translate(180, 180);
-          for (var i = -canvas.width/2 - $('#graph-offset-xr').value; i < canvas.width/2 - $('#graph-offset-xr').value; i += 5/10) {
+          var preprecision = Number($('#trace-round').value);
+          if (preprecision < -3) preprecision = -1;
+          var precision = 5 * 10 ** preprecision;
+          if (preprecision > 0) precision /= 5 * 5 ** (preprecision - 1);
+          if (preprecision < -1) precision = 0.25;
+          if (preprecision < -2) precision = 0.125;
+          for (var i = -canvas.width/2 - $('#graph-offset-xr').value; i < canvas.width/2 - $('#graph-offset-xr').value; i += precision) {
             let width = 1;
             // The linear graph
             var xrt = i;
             var yrt = -solve(xrt, Number($('#xiv-input').value), false);
-            var xrtNext = i + 5/10;
+            var xrtNext = i + precision;
             var yrtNext = -solve(xrtNext, Number($('#xiv-input').value), false);
             if ($('#graph-dimension-xi').checked == true) {
               yrt = -solve(Number($('#xiv-input').value), xrt, false);
