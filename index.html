@@ -15,7 +15,7 @@
     <meta name='theme-color' content='#7C614D'/> <!-- Safari navbar theme -->
     <meta name="apple-mobile-web-app-capable" content="yes"/> <!-- i(Pad)OS web app -->
     <meta name="format-detection" content="telephone=no"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/> <!-- disable zoom -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/> <!-- disable zoom -->
 
     <link href='style.css' rel='stylesheet' type='text/css'/>
     <style>
@@ -23,6 +23,7 @@
       #bgcontainer {
         background: url(http://anantam.aeonic.me/bg.png);
       }
+      
     </style>
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <link href='http://aryabhata.aeonic.me/noedit.sigma.css' rel='stylesheet' type='text/css'/>
@@ -105,12 +106,13 @@
                         <input type='radio' name='graph-dimension-y' id='graph-dimension-yr' checked='checked'/><label for='graph-dimension-yr'>Real only</label><br/>
                         <input type='radio' name='graph-dimension-y' id='graph-dimension-yi'/><label for='graph-dimension-yi'>Imaginary only</label><br/>
                       </form><br/>
+                      <input id='graph-dimension-3d' type='checkbox'/> <label for='graph-dimension-3d'>Enable 3D?</label><br/>
                     </div>
                     <hr/>
                     <input id='graph-ticks' type='checkbox' checked='checked'/> <label for='graph-ticks'>Tick marks?</label><br/>
                     <input id='graph-grids' type='checkbox' checked='checked'/> <label for='graph-grids'>Grid lines?</label><br/>
                     <input id='graph-points' type='checkbox' checked='checked'/> <label for='graph-points'>Graph points?</label><br/>
-                    <input id='graph-dimension-3d' type='checkbox'/> <label for='graph-dimension-3d'>Enable 3D?</label><br/>
+                    <input id='graph-scroll-xiv' type='checkbox'/> <label for='graph-scroll-xiv'>Scroll for x-iv?</label><br/>
                     <input id='graph-auto' type='checkbox' checked='checked'/> <label for='graph-auto' title='resource-consuming'>Graph automatically?</label><br/>
                     <input id='graph-advanced' type='checkbox'/> <label for='graph-advanced'>Advanced options?</label><br/>
                   </center>
@@ -254,7 +256,7 @@
 
           }, 37);
 
-          document.querySelectorAll('#graphing input[type=text], #graphing input[type=number], #graphing input[type=checkbox], #graphing select').forEach(input => {
+          document.querySelectorAll('#graphing input[type=text], #graphing input[type=number], #graphing input[type=checkbox], #graphing select, #fullscreen-modal input, #xiv-td input').forEach(input => {
             input.addEventListener('input', function () {
               // if the user selects to graph automatically (resource-consuming)
               if ($('#graph-auto').checked == true) graphFunction();
@@ -421,7 +423,7 @@
 
           canvas.addEventListener('wheel', function (e) {
             e.preventDefault();
-            if (fullscreen != true) {
+            if ($('#graph-scroll-xiv').checked == true) { // originally fullscreen != true
               // Vertical scrolling
               if (e.deltaY > 0) {
                 // Scroll down; ideally decrease y-i viewport
@@ -453,7 +455,7 @@
                 $('#xiv-value').innerHTML = xiv;
               }
             }
-            else if (fullscreen == true) {
+            else if ($('#graph-scroll-xiv').checked != true) { // originally fullscreen == true
               // Vertical scrolling
               if (e.deltaY > 0) {
                 // Scroll down; ideally decrease yr offset
