@@ -913,7 +913,7 @@
                 </thead>
                 <tbody>
                   <tr class='numrow'>
-                    <td><input type='button' value='1ⁱ' onClick="document.calculator.ans.value+='1';document.calculator.ansTwo.value+='1';" class='calb caln'/></td>
+                    <td><input type='button' value='1' onClick="document.calculator.ans.value+='1';document.calculator.ansTwo.value+='1';" class='calb caln'/></td>
                     <td><input type='button' value='2' onClick="document.calculator.ans.value+='2';document.calculator.ansTwo.value+='2';" class='calb caln'/></td>
                     <td><input type="button" value="3" onClick="document.calculator.ans.value+='3';document.calculator.ansTwo.value+='3';" class='calb caln'/></td>
                     <td><input type="button" value="+" onClick="document.calculator.ans.value+='+';document.calculator.ansTwo.value+='+';" class='calb calo'/></td>
@@ -1722,6 +1722,11 @@
             var type;
             if (i <= 143) type = 'superactinide';
             else if (i > 143 && i <= 157) type = 'unquadquadide';
+            else if (i > 157 && i <= 166) type = 'transition metal';
+            else if (i > 166 && i <= 169) type = 'post-transition metal';
+            else if (i == 170) type = 'metalloid';
+            else if (i == 171) type = 'halogen';
+            else if (i == 172) type = 'noble gas';
             else if (i == 173) type = 'alkali metal';
             else if (i == 174) type = 'alkaline earth metal';
             else if (i < 174) type = 'impossible'
@@ -1917,16 +1922,18 @@
             var buttonsToUpdate = [
                 { value: "^^", replacementValue: "ln", onclick: function() { appendText('ln('); } },
                 { value: "^", replacementValue: "n√", onclick: function() { appendText('nthRoot('); } },
-                { value: "1ⁱ", replacementValue: "i", onclick: function() { document.calculator.ans.value+="sqrt(-1)";document.calculator.ansTwo.value+='i'; } },
-                { value: "2²", replacementValue: "²", onclick: function() { document.calculator.ans.value+="** 2";document.calculator.ansTwo.value+='²'; } },
-                { value: "3³", replacementValue: "³", onclick: function() { document.calculator.ans.value+="** 3";document.calculator.ansTwo.value+='³'; } },
-                { value: "4ⁿʳᵗ", replacementValue: "ⁿ√", onclick: function() { document.calculator.ans.value+="nrt(";document.calculator.ansTwo.value+='nrt('; } },
-                { value: "5ˢʳᵗ", replacementValue: "√", onclick: function() { document.calculator.ans.value+="sqrt(";document.calculator.ansTwo.value+='√('; } },
-                { value: "6ᶜᵇʳᵗ", replacementValue: "∛", onclick: function() { appendText('cbrt('); } },
-                { value: "8", replacementValue: "!", onclick: function() { appendText('!'); } },
-                { value: "9", replacementValue: "log₂", onclick: function() { appendText('log2('); } },
+                { value: "1", replacementValue: "i", onclick: function() { document.calculator.ans.value+="sqrt(-1)";document.calculator.ansTwo.value+='i'; } },
+                { value: "2", replacementValue: "²", onclick: function() { document.calculator.ans.value+="** 2";document.calculator.ansTwo.value+='²'; } },
+                { value: "3", replacementValue: "³", onclick: function() { document.calculator.ans.value+="** 3";document.calculator.ansTwo.value+='³'; } },
+                { value: "4", replacementValue: "ⁿ√", onclick: function() { document.calculator.ans.value+="nrt(";document.calculator.ansTwo.value+='nrt('; } },
+                { value: "5", replacementValue: "√", onclick: function() { document.calculator.ans.value+="sqrt(";document.calculator.ansTwo.value+='√('; } },
+                { value: "6", replacementValue: "∛", onclick: function() { appendText('cbrt('); } },
+                { value: "7", replacementValue: "!", onclick: function() { appendText('!'); } },
+                { value: "8", replacementValue: "$", onclick: function() { appendText('$'); } },
+                { value: "9", replacementValue: "log₂", onclick: function() { appendText('log<sub>2</sub>(', '(1/log(2))/log('); } },
                 { value: "(-)", replacementValue: "%", onclick: function() { appendText('%'); } },
-                { value: "0", replacementValue: "log₁₀", onclick: function() { appendText('log10('); } },
+                { value: "0", replacementValue: "log₁₀", onclick: function() { appendText('log<sub>10</sub>(', 'log('); } },
+                { value: "aⁿ", replacementValue: "ⁿa", onclick: function() { appendText('^^'); } },
             ];
         
             buttonsToUpdate.forEach(button => {
@@ -1945,13 +1952,14 @@
           else {
             // Revert the buttons to their original values and functionalities
             var buttonsToRevert = [
-              { value: "i", originalValue: "1ⁱ", onclick: function() { appendText('1'); } },
-              { value: "²", originalValue: "2²", onclick: function() { appendText('2'); } },
-              { value: "³", originalValue: "3³", onclick: function() { appendText('3'); } },
-              { value: "ⁿ√", originalValue: "4ⁿʳᵗ", onclick: function() { appendText('4'); } },
-              { value: "√", originalValue: "5ˢʳᵗ", onclick: function() { appendText('5'); } },
-              { value: "∛", originalValue: "6ᶜᵇʳᵗ", onclick: function() { appendText('6'); } },
-              { value: "!", originalValue: "8", onclick: function() { appendText('8'); } },
+              { value: "i", originalValue: "1", onclick: function() { appendText('1'); } },
+              { value: "²", originalValue: "2", onclick: function() { appendText('2'); } },
+              { value: "³", originalValue: "3", onclick: function() { appendText('3'); } },
+              { value: "ⁿ√", originalValue: "4", onclick: function() { appendText('4'); } },
+              { value: "√", originalValue: "5", onclick: function() { appendText('5'); } },
+              { value: "∛", originalValue: "6", onclick: function() { appendText('6'); } },
+              { value: "!", originalValue: "7", onclick: function() { appendText('7'); } },
+              { value: "$", originalValue: "8", onclick: function() { appendText('8'); } },
               { value: "log₂", originalValue: "9", onclick: function() { appendText('9'); } },
               { value: "log₁₀", originalValue: "0", onclick: function() { appendText('0'); } },
             ];
@@ -2008,17 +2016,21 @@
       }
       function evaluateExpression() {
           var ansField = document.calculator.ans;
-          var ansTwoField = document.calculator.ansTwo;
+          var ansTwoField = document.calculator.ansTwo.replace(/([\d\w\)\.]+)\s*\^\^\s*([\d\w\(\)\.]+)/g, 'tet($1,$2)').replace(/\|([^|]+)\|/g, 'abs($1)').replace('{','(').replace('}', ')');;
+          let scope = {
+            x: math.complex(x, i),
+            tet: tet,
+          };
           
           ansField.value = eval(ansField.value);
           ansTwoField.value = math.evaluate(ansTwoField.value);
       }
 
-      function appendText(text) {
+      function appendText(text, text2=text) {
           var ansField = document.calculator.ans;
           var ansTwoField = document.calculator.ansTwo;
           
-          ansField.value += text;
+          ansField.innerHTML += text;
           ansTwoField.value += text;
       }
 
